@@ -65,6 +65,7 @@ type SearchForm = {
 
 const presets: SearchForm[] = [
   { label: "Iveco F3B 380", brand: "Iveco", engine: "F3B 380", model: "Cursor 13" },
+  { label: "Mercedes OM352", brand: "Mercedes-Benz", engine: "OM352", model: "OM352" },
   { label: "Scania DC12 420", brand: "Scania", engine: "DC12 420", model: "124 420" },
   { label: "MWM X10", brand: "MWM", engine: "X10 6 cilindros", model: "X10" },
   { label: "Cummins 6TAA", brand: "Cummins", engine: "6TAA 6.304", model: "6TAA 6.304" },
