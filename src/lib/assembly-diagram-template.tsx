@@ -6,6 +6,26 @@ type TorqueSpec = {
   value: string;
 };
 
+function headerBar(label: string) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        width: "100%",
+        minHeight: 54,
+        padding: "0 14px",
+        background: "#b7dde6",
+        borderRadius: 10,
+        fontSize: 21,
+        fontWeight: 900,
+      }}
+    >
+      {label}
+    </div>
+  );
+}
+
 export function createAssemblyDiagramElement({
   title,
   engine,
@@ -42,26 +62,19 @@ export function createAssemblyDiagramElement({
   const focusItems = (componentFocus?.length
     ? componentFocus
     : isGearbox
-      ? ["eixo piloto", "engrenagens", "sincronizadores", "folga axial"]
+      ? ["eixo piloto", "sincronizadores", "calcos", "folga axial"]
       : isVEngine
-        ? ["bancada A", "bancada B", "turbo", "sincronismo"]
-        : ["cabecote", "camisas", "bielas", "lubrificacao"]
+        ? ["banco a", "banco b", "turbo", "sincronismo"]
+        : ["mancais", "cabecote", "biela fraturada", "camisas"]
   ).slice(0, 4);
 
+  const torqueRows = torqueSpecs.slice(0, 4);
+  const specRows = [...measureLines, ...referenceLines].slice(0, 6);
   const sequenceOrder = isGearbox
     ? ["1", "3", "5", "7", "8", "6", "4", "2"]
     : isVEngine
       ? ["1", "4", "8", "5", "2", "3", "7", "6"]
-      : ["9", "5", "1", "3", "7", "11", "12", "8", "4", "2", "6", "10"];
-
-  const summaryItems = [
-    `Familia: ${matchedFamily}`,
-    `Aplicacao: ${matchedApplication}`,
-    `Anos: ${matchedYears}`,
-    ...(referenceLines || []).slice(0, 3),
-    ...(noteLines || []).slice(0, 2),
-    aiMode ? "Modo IA multi-provider ativo para refinamento tecnico." : "Modo tecnico local com padrao de oficina.",
-  ].slice(0, 8);
+      : ["1", "3", "7", "26", "23", "26", "25", "2", "4", "5", "16", "15", "22", "10", "14", "18", "19", "23", "25", "26"];
 
   return (
     <div
@@ -70,204 +83,200 @@ export function createAssemblyDiagramElement({
         height: 1500,
         display: "flex",
         flexDirection: "column",
-        background: "#e8e2d6",
-        color: "#0f172a",
-        fontFamily: "MTManual",
-        padding: 18,
-        gap: 12,
+        gap: 10,
+        padding: 16,
+        background: "linear-gradient(180deg, #e8edf0 0%, #ece6db 100%)",
+        color: "#111827",
+        fontFamily: "MTManual, sans-serif",
         boxSizing: "border-box",
       }}
     >
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
+          justifyContent: "center",
+          minHeight: 74,
           border: "3px solid #1f2937",
-          borderRadius: 16,
-          background: "#f6f2ea",
-          padding: "12px 18px",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <div style={{ display: "flex", fontSize: 18, fontWeight: 800 }}>MT DIESEL ESQUEMAS • PRANCHA DE OFICINA</div>
-          <div style={{ display: "flex", fontSize: 46, fontWeight: 800 }}>{title}</div>
-          <div style={{ display: "flex", fontSize: 18, fontWeight: 700, color: "#475569" }}>{engine.toUpperCase()}</div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end" }}>
-          <div style={{ display: "flex", fontSize: 16, fontWeight: 800 }}>LAYOUT TECNICO REALISTA</div>
-          <div style={{ display: "flex", fontSize: 15, fontWeight: 700 }}>{isGearbox ? "TRANSMISSAO" : isVEngine ? "MOTOR V" : "MOTOR EM LINHA"}</div>
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          border: "2px solid #94a3b8",
           borderRadius: 12,
-          background: "#edf3f6",
-          padding: "8px 12px",
-          gap: 18,
-          fontSize: 15,
-          fontWeight: 800,
+          background: "#f5f7f8",
+          fontSize: 33,
+          fontWeight: 900,
+          letterSpacing: 0.5,
+          textAlign: "center",
+          padding: "0 10px",
         }}
       >
-        <div style={{ display: "flex" }}>DESENHO DE MONTAGEM</div>
-        <div style={{ display: "flex" }}>SEQUENCIA DE APERTO</div>
-        <div style={{ display: "flex" }}>MEDICOES CRITICAS</div>
-        <div style={{ display: "flex" }}>FECHAMENTO FINAL</div>
+        {title}
       </div>
 
-      <div style={{ display: "flex", gap: 14, flex: 1 }}>
-        <div style={{ display: "flex", flexDirection: "column", width: 980, gap: 14 }}>
-          <div style={{ display: "flex", flexDirection: "column", border: "3px solid #cbd5e1", borderRadius: 16, background: "#f8fafc", padding: 14, gap: 10, flex: 1 }}>
-            <div style={{ display: "flex", fontSize: 24, fontWeight: 800 }}>VISTA PRINCIPAL DO CONJUNTO</div>
-            {illustrationDataUrl ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <img src={illustrationDataUrl} alt="Base mecanica IA" style={{ width: 930, height: 320, objectFit: "cover", borderRadius: 12, border: "3px solid #334155" }} />
-                <div style={{ display: "flex", fontSize: 14, fontWeight: 800, color: "#475569" }}>REFERENCIA MECANICA GERADA POR IA</div>
-              </div>
-            ) : null}
-
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "flex-end", gap: 10 }}>
+      <div style={{ display: "flex", gap: 10, flex: 1 }}>
+        <div style={{ display: "flex", flexDirection: "column", width: 1040, gap: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", border: "2px solid #c7ced4", borderRadius: 12, background: "#efefef", padding: 10, gap: 8, flex: 1 }}>
+            {headerBar(isGearbox ? "CAIXA E EIXOS PRINCIPAIS" : "BLOCO E PARTE INFERIOR")}
+            <div style={{ display: "flex", fontSize: 18, fontWeight: 900 }}>{isGearbox ? "ENGRENAGENS E ALOJAMENTOS" : "BRONZINAS DE MANCAL (CAPA)"}</div>
+            <div style={{ display: "flex", gap: 12, alignItems: "stretch", flex: 1 }}>
+              <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 10 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "0 20px" }}>
                   {Array.from({ length: isVEngine ? 8 : 6 }).map((_, index) => (
-                    <div key={`inj-${index}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                      <div style={{ display: "flex", width: 8, height: 28, background: "#64748b", borderRadius: 4 }} />
-                      <div style={{ display: "flex", width: 22, height: 16, borderRadius: 4, background: "#d1d9df", border: "2px solid #334155" }} />
+                    <div key={`arr-${index}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                      <div style={{ display: "flex", width: 28, height: 28, borderRadius: 999, background: "#f0a053", border: "2px solid #8a5115", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900 }}>{index + 1}</div>
+                      <div style={{ display: "flex", width: 3, height: 26, background: "#000" }} />
+                      <div style={{ width: 0, height: 0, borderLeft: "8px solid transparent", borderRight: "8px solid transparent", borderTop: "16px solid #ef8a28" }} />
                     </div>
                   ))}
                 </div>
-                <div style={{ display: "flex", width: isVEngine ? 440 : 520, height: 60, borderRadius: 12, background: "#dbe4ea", border: "3px solid #334155" }} />
-                <div style={{ display: "flex", width: isVEngine ? 520 : 620, height: 110, borderRadius: 16, background: "#9aa8b4", border: "3px solid #334155", alignItems: "center", justifyContent: "space-around", padding: "0 16px" }}>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ display: "flex", width: 24, height: 24, borderRadius: 999, border: "4px solid #516170", background: "#dbe2e7" }} />
                   {Array.from({ length: isVEngine ? 8 : 6 }).map((_, index) => (
-                    <div key={`cyl-${index}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-                      <div style={{ display: "flex", width: 18, height: 18, borderRadius: 999, background: "#6b7b87", border: "2px solid #334155" }} />
-                      <div style={{ display: "flex", width: 26, height: 42, borderRadius: 7, background: "#dfe5ea", border: "2px solid #334155" }} />
-                      <div style={{ display: "flex", width: 18, height: 18, borderRadius: 5, background: "#f2c48d", border: "2px solid #8c5a2b" }} />
+                    <div key={`main-${index}`} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <div style={{ display: "flex", width: 16, height: 74, borderRadius: 8, background: "#50616d", border: "2px solid #29323a" }} />
+                      <div style={{ display: "flex", width: 28, height: 98, borderRadius: 14, background: "#b7c2ca", border: "3px solid #29323a" }} />
+                    </div>
+                  ))}
+                  <div style={{ display: "flex", width: 24, height: 24, borderRadius: 999, border: "4px solid #516170", background: "#dbe2e7" }} />
+                </div>
+
+                <div style={{ display: "flex", width: "100%", height: 120, borderRadius: 10, background: "#98a6ae", border: "3px solid #29323a", justifyContent: "space-around", alignItems: "center" }}>
+                  {Array.from({ length: isVEngine ? 8 : 6 }).map((_, index) => (
+                    <div key={`bolt-${index}`} style={{ display: "flex", width: 18, height: 18, borderRadius: 999, background: "#83919b", border: "2px solid #29323a" }} />
+                  ))}
+                </div>
+
+                <div style={{ display: "flex", fontSize: 14, fontWeight: 800, color: "#475569" }}>SEQUENCIA DE APERTO E VISTA DA PARTE INFERIOR DO CONJUNTO</div>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", width: 320, gap: 8 }}>
+                <div style={{ display: "flex", flex: 1, borderRadius: 10, background: "#ebe2c8", border: "2px solid #d0c3a2", padding: 10, position: "relative", overflow: "hidden" }}>
+                  {illustrationDataUrl ? (
+                    <img src={illustrationDataUrl} alt="referencia" style={{ width: "100%", height: "100%", objectFit: "cover", opacity: 0.22 }} />
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, opacity: 0.4 }}>
+                      <div style={{ display: "flex", width: 180, height: 38, border: "2px solid #475569", borderRadius: 8 }} />
+                      <div style={{ display: "flex", width: 210, height: 90, border: "2px solid #475569", borderRadius: 8 }} />
+                      <div style={{ display: "flex", width: 120, height: 60, border: "2px solid #475569", borderRadius: 8 }} />
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", border: "2px solid #d0c3a2", borderRadius: 10, background: "#efd7a8", padding: 8, gap: 6 }}>
+                  <div style={{ display: "flex", fontSize: 15, fontWeight: 900 }}>SEQUENCIA DE APERTO (CENTRO PARA FORA)</div>
+                  {torqueRows.map((item, index) => (
+                    <div key={`${item.component}-${index}`} style={{ display: "flex", justifyContent: "space-between", fontSize: 14, fontWeight: 800, borderBottom: "1px solid #b99b61", paddingBottom: 3 }}>
+                      <div style={{ display: "flex" }}>{`${index + 1} ETAPA`}</div>
+                      <div style={{ display: "flex" }}>{item.value}</div>
                     </div>
                   ))}
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 76, height: 76, borderRadius: 999, background: "#d9e0e5", border: "4px solid #334155" }}>
-                    <div style={{ display: "flex", width: 34, height: 34, borderRadius: 999, background: "#93a1ac", border: "3px solid #334155" }} />
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    <div style={{ display: "flex", width: isVEngine ? 340 : 430, height: 8, background: "#1f2937", borderRadius: 6 }} />
-                    <div style={{ display: "flex", width: isVEngine ? 340 : 430, height: 8, background: "#1f2937", borderRadius: 6 }} />
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 66, height: 66, borderRadius: 999, background: "#d9e0e5", border: "4px solid #334155" }}>
-                    <div style={{ display: "flex", width: 24, height: 24, borderRadius: 999, background: "#93a1ac", border: "3px solid #334155" }} />
-                  </div>
-                </div>
-                <div style={{ display: "flex", fontSize: 15, fontWeight: 800, color: "#334155" }}>VISTA EXPLODIDA DE BLOCO, CABECOTE, ACIONAMENTO E CONJUNTO MOVEL</div>
               </div>
+            </div>
+          </div>
 
-              <div style={{ display: "flex", flexDirection: "column", width: 230, border: "2px solid #c5b89c", borderRadius: 12, background: "#efe5d0", padding: 10, gap: 8 }}>
-                <div style={{ display: "flex", fontSize: 17, fontWeight: 800 }}>LEGENDA TECNICA</div>
-                {focusItems.map((item, index) => (
-                  <div key={`${item}-${index}`} style={{ display: "flex", fontSize: 15, fontWeight: 700, color: "#7c2d12" }}>
-                    {`${index + 1}. ${item.toUpperCase()}`}
+          <div style={{ display: "flex", gap: 10, minHeight: 280 }}>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, border: "2px solid #c7ced4", borderRadius: 12, background: "#efefef", padding: 10, gap: 8 }}>
+              {headerBar(isGearbox ? "SINCRONIZADORES" : "BIELAS (CAPA FRATURADA)")}
+              <div style={{ display: "flex", gap: 10, alignItems: "center", justifyContent: "space-between", flex: 1 }}>
+                <div style={{ display: "flex", width: 72, height: 72, borderRadius: 999, border: "6px solid #3d4756" }} />
+                <div style={{ display: "flex", width: 68, height: 164, borderRadius: 22, background: "#d5dce3", border: "5px solid #3d4756", transform: "rotate(30deg)" }} />
+                <div style={{ display: "flex", width: 36, height: 36, borderRadius: 999, border: "6px solid #3d4756" }} />
+              </div>
+              <div style={{ display: "flex", fontSize: 14, fontWeight: 800, color: "#7c2d12" }}>{noteLines[0] || "ORIENTACAO E ENCAIXE DEVEM SER CONFERIDOS"}</div>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", flex: 1.15, border: "2px solid #c7ced4", borderRadius: 12, background: "#efefef", padding: 10, gap: 8 }}>
+              {headerBar(isGearbox ? "DADOS E TOLERANCIAS" : "ESPECIFICACOES DA BIELA")}
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                {specRows.map((item, index) => (
+                  <div key={`${item}-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: 10, background: index % 2 === 0 ? "#f0d592" : "#edd38a", border: "1px solid #b99b61", padding: "5px 8px", fontSize: 14, fontWeight: 800 }}>
+                    <div style={{ display: "flex", flex: 1 }}>{item}</div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-
-          <div style={{ display: "flex", border: "3px solid #cbd5e1", borderRadius: 16, background: "#f8fafc", padding: 14, gap: 16, minHeight: 210 }}>
-            <div style={{ display: "flex", flexDirection: "column", width: 260, gap: 8 }}>
-              <div style={{ display: "flex", fontSize: 22, fontWeight: 800 }}>{isGearbox ? "EIXO E FIXACAO" : "BIELA E PISTAO"}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{ display: "flex", width: 54, height: 54, borderRadius: 999, border: "4px solid #374151" }} />
-                <div style={{ display: "flex", width: 56, height: 116, borderRadius: 18, background: "#d8dee6", border: "4px solid #374151", transform: "rotate(26deg)" }} />
-                <div style={{ display: "flex", width: 28, height: 28, borderRadius: 999, border: "4px solid #374151" }} />
-              </div>
-              <div style={{ display: "flex", padding: "4px 8px", borderRadius: 999, background: "#efe5d0", fontSize: 14, fontWeight: 800, color: "#7c2d12" }}>ORIENTACAO DE MONTAGEM</div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 6 }}>
-              <div style={{ display: "flex", fontSize: 18, fontWeight: 800 }}>OBSERVACOES DE FECHAMENTO</div>
-              {noteLines.slice(0, 4).map((item) => (
-                <div key={item} style={{ display: "flex", fontSize: 15, fontWeight: 700, color: "#334155" }}>{item}</div>
-              ))}
-            </div>
-          </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", width: 560, gap: 14 }}>
-          <div style={{ display: "flex", flexDirection: "column", border: "3px solid #cbd5e1", borderRadius: 16, background: "#f8fafc", padding: 14, gap: 10 }}>
-            <div style={{ display: "flex", fontSize: 22, fontWeight: 800 }}>SEQUENCIA DE APERTO</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-              {sequenceOrder.map((item) => (
-                <div key={item} style={{ display: "flex", width: 30, height: 30, borderRadius: 999, alignItems: "center", justifyContent: "center", background: "#f1a24e", border: "2px solid #9a5808", fontSize: 14, fontWeight: 800 }}>{item}</div>
+        <div style={{ display: "flex", flexDirection: "column", width: 520, gap: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", border: "2px solid #c7ced4", borderRadius: 12, background: "#efefef", padding: 10, gap: 8 }}>
+            {headerBar(isGearbox ? "REGULAGEM SUPERIOR" : "MONTAGEM SUPERIOR")}
+            <div style={{ display: "flex", fontSize: 17, fontWeight: 900 }}>{isGearbox ? "CALCOS E PRE-CARGA" : "PARA FUSOS DO CABECOTE"}</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: 8, borderRadius: 10, background: "#d9d2c4", border: "2px solid #c7b89a" }}>
+              {sequenceOrder.map((item, index) => (
+                <div key={`${item}-${index}`} style={{ display: "flex", width: 30, height: 30, borderRadius: 999, alignItems: "center", justifyContent: "center", background: "#f0a053", border: "2px solid #8a5115", fontSize: 13, fontWeight: 900 }}>{item}</div>
               ))}
             </div>
-            {torqueSpecs.map((item) => (
-              <div key={`${item.component}-${item.value}`} style={{ display: "flex", flexDirection: "column", gap: 2, padding: "8px 10px", borderRadius: 10, background: "#fff7ed" }}>
-                <div style={{ display: "flex", fontSize: 16, fontWeight: 800 }}>{item.component}</div>
-                <div style={{ display: "flex", fontSize: 14, fontWeight: 700, color: "#475569" }}>{item.sequence}</div>
-                <div style={{ display: "flex", fontSize: 15, fontWeight: 800, color: "#7c2d12" }}>{item.value}</div>
-              </div>
-            ))}
+            <div style={{ display: "flex", justifyContent: "center", fontSize: 15, fontWeight: 900 }}>PADRAO CARACOL</div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", border: "3px solid #cbd5e1", borderRadius: 16, background: "#f8fafc", padding: 14, gap: 10, flex: 1 }}>
-            <div style={{ display: "flex", fontSize: 22, fontWeight: 800 }}>{isGearbox ? "ENGRENAMENTO" : "SINCRONISMO"}</div>
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: 10 }}>
-              <div style={{ display: "flex", position: "relative", width: 320, height: 180, alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ display: "flex", width: 88, height: 88, borderRadius: 999, border: "5px solid #475569" }} />
-                <div style={{ display: "flex", width: 88, height: 88, borderRadius: 999, border: "5px solid #475569" }} />
-                <div style={{ display: "flex", position: "absolute", left: 102, top: 92, width: 60, height: 60, borderRadius: 999, background: "#94a3b8", border: "4px solid #475569" }} />
-                <div style={{ display: "flex", position: "absolute", left: 43, top: 20, width: 70, height: 120, borderLeft: "5px solid #0f766e", borderRight: "5px solid #0f766e", borderTop: "5px solid #0f766e", borderBottom: "5px solid transparent", borderRadius: 18 }} />
-                <div style={{ display: "flex", position: "absolute", left: 208, top: 20, width: 70, height: 120, borderLeft: "5px solid #0f766e", borderRight: "5px solid #0f766e", borderTop: "5px solid #0f766e", borderBottom: "5px solid transparent", borderRadius: 18 }} />
+          <div style={{ display: "flex", flexDirection: "column", border: "2px solid #c7ced4", borderRadius: 12, background: "#efefef", padding: 10, gap: 8, flex: 1 }}>
+            {headerBar(isGearbox ? "SINCRONISMO" : "SINCRONISMO E REGULAGEM")}
+            <div style={{ display: "flex", fontSize: 17, fontWeight: 900 }}>{isGearbox ? "ACOPLAMENTO DE EIXOS" : "SINCRONISMO DO COMANDO"}</div>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
+              <div style={{ display: "flex", position: "relative", width: 300, height: 210, alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", width: 94, height: 94, borderRadius: 999, border: "5px solid #4b5563" }} />
+                <div style={{ display: "flex", width: 94, height: 94, borderRadius: 999, border: "5px solid #4b5563" }} />
+                <div style={{ display: "flex", position: "absolute", left: 106, bottom: 4, width: 66, height: 66, borderRadius: 999, background: "#94a3b8", border: "4px solid #475569" }} />
+                <div style={{ display: "flex", position: "absolute", left: 50, top: 28, width: 200, height: 120, borderLeft: "5px solid #0f766e", borderRight: "5px solid #0f766e", borderTop: "5px solid #0f766e", borderBottom: "5px solid transparent", borderRadius: 18 }} />
               </div>
             </div>
-            {regulationLines.slice(0, 4).map((item) => (
-              <div key={item} style={{ display: "flex", fontSize: 15, fontWeight: 700, color: "#334155" }}>{item}</div>
+            {regulationLines.slice(0, 3).map((item) => (
+              <div key={item} style={{ display: "flex", fontSize: 14, fontWeight: 800 }}>{item}</div>
             ))}
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 14 }}>
-          <div style={{ display: "flex", flexDirection: "column", border: "3px solid #cbd5e1", borderRadius: 16, background: "#f8fafc", padding: 14, gap: 10, flex: 1 }}>
-            <div style={{ display: "flex", fontSize: 22, fontWeight: 800 }}>{isGearbox ? "MEDICOES E CALCOS" : "MEDICOES DO CABECOTE"}</div>
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 18, paddingTop: 8, paddingBottom: 4 }}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                <div style={{ display: "flex", width: 72, height: 72, background: "#bcc8cf", border: "3px solid #475569", borderRadius: 6 }} />
-                <div style={{ display: "flex", width: 46, height: 100, background: "#eab384" }} />
-                <div style={{ display: "flex", width: 84, height: 84, background: "#bcc8cf", border: "3px solid #475569", borderRadius: 6, justifyContent: "center", alignItems: "center" }}>
-                  <div style={{ display: "flex", width: 18, height: 18, borderRadius: 999, background: "#94a3b8", border: "2px solid #475569" }} />
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", border: "2px solid #c7ced4", borderRadius: 12, background: "#efefef", padding: 10, gap: 8, flex: 1 }}>
+            {headerBar(isGearbox ? "ESPECIFICACOES ADICIONAIS" : "ESPECIFICACOES ADICIONAIS DO CABECOTE")}
+            <div style={{ display: "flex", gap: 14, flex: 1 }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, width: 220 }}>
+                <div style={{ display: "flex", width: 94, height: 72, background: "#bcc8cf", border: "3px solid #475569", borderRadius: 6 }} />
+                <div style={{ display: "flex", width: 150, height: 56, background: "#d9e2e8", border: "3px solid #475569", clipPath: "polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%)" }} />
+                <div style={{ display: "flex", width: 56, height: 110, background: "#e9b384" }} />
+                <div style={{ display: "flex", width: 94, height: 112, background: "#bcc8cf", border: "3px solid #475569", borderRadius: 6, alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ display: "flex", width: 20, height: 20, borderRadius: 999, background: "#94a3b8", border: "2px solid #475569" }} />
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <div style={{ display: "flex", width: 60, height: 2, background: "#c2410c" }} />
-                <div style={{ display: "flex", width: 2, height: 100, background: "#c2410c" }} />
-                <div style={{ display: "flex", width: 60, height: 2, background: "#c2410c" }} />
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1, justifyContent: "center" }}>
+                {measureLines.slice(0, 4).map((item) => (
+                  <div key={item} style={{ display: "flex", fontSize: 16, fontWeight: 900, color: "#111827" }}>{item}</div>
+                ))}
+                <div style={{ display: "flex", height: 2, background: "#c58b33", marginTop: 4, marginBottom: 4 }} />
+                {focusItems.map((item) => (
+                  <div key={item} style={{ display: "flex", fontSize: 14, fontWeight: 800, color: "#7c2d12" }}>{item.toUpperCase()}</div>
+                ))}
               </div>
             </div>
-            {measureLines.slice(0, 5).map((item) => (
-              <div key={item} style={{ display: "flex", fontSize: 15, fontWeight: 700, color: "#7c2d12" }}>{item}</div>
-            ))}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", border: "3px solid #cbd5e1", borderRadius: 16, background: "#f8fafc", padding: 14, gap: 8 }}>
-            <div style={{ display: "flex", fontSize: 20, fontWeight: 800 }}>VERIFICACAO FINAL</div>
-            {referenceLines.slice(0, 4).map((item) => (
-              <div key={item} style={{ display: "flex", fontSize: 14, fontWeight: 700, color: "#334155" }}>{item}</div>
-            ))}
+          <div style={{ display: "flex", gap: 10, minHeight: 170 }}>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, border: "2px solid #c7ced4", borderRadius: 12, background: "#efefef", padding: 10, gap: 8 }}>
+              {headerBar(isGearbox ? "VERIFICACAO" : "REGULAGEM DOS INJETORES")}
+              {noteLines.slice(0, 3).map((item) => (
+                <div key={item} style={{ display: "flex", fontSize: 14, fontWeight: 800 }}>{item}</div>
+              ))}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, border: "2px solid #c7ced4", borderRadius: 12, background: "#efefef", padding: 10, gap: 8 }}>
+              {headerBar(isGearbox ? "MEDIDAS" : "PARAFUSO E LIMITE")}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
+                <div style={{ display: "flex", width: 40, height: 10, background: "#95a4ae" }} />
+                <div style={{ display: "flex", width: 150, height: 10, background: "#95a4ae" }} />
+                <div style={{ display: "flex", width: 16, height: 16, borderRadius: 999, background: "#95a4ae" }} />
+              </div>
+              <div style={{ display: "flex", fontSize: 16, fontWeight: 900, color: "#7c2d12" }}>{referenceLines[0] || `MOTOR: ${engine}`}</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", borderRadius: 14, background: "#0b3040", padding: 18, gap: 8 }}>
-        <div style={{ display: "flex", fontSize: 28, fontWeight: 800, color: "#f8fafc" }}>RESUMO TECNICO E REFERENCIAS</div>
-        {summaryItems.map((item) => (
-          <div key={item} style={{ display: "flex", fontSize: 18, fontWeight: 700, color: "#dbeafe" }}>{item}</div>
-        ))}
+      <div style={{ display: "flex", flexDirection: "column", borderRadius: 10, background: "#0b3040", padding: 12, gap: 4 }}>
+        <div style={{ display: "flex", fontSize: 20, fontWeight: 900, color: "#f8fafc" }}>RESUMO TECNICO</div>
+        <div style={{ display: "flex", fontSize: 15, fontWeight: 800, color: "#dbeafe" }}>{`FAMILIA: ${matchedFamily} • APLICACAO: ${matchedApplication} • ANOS: ${matchedYears}`}</div>
+        <div style={{ display: "flex", fontSize: 14, fontWeight: 700, color: "#dbeafe" }}>{aiMode ? "MODO IA ATIVO PARA REFINO VISUAL E TECNICO" : "MODO TECNICO LOCAL"}</div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", borderRadius: 10, background: "#e9d9a3", padding: "8px 12px", fontSize: 16, fontWeight: 800, color: "#7c2d12" }}>
-        DICA DE OFICINA: LUBRIFIQUE ROSCAS, SIGA A SEQUENCIA DE APERTO E CONFIRA O PMS ANTES DA PARTIDA.
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, background: "#d7c67a", minHeight: 42, fontSize: 17, fontWeight: 900, color: "#312100" }}>
+        DICA: USE OLEO LIMPO NAS ROSCAS E SUBSTITUA FIXADORES DE APERTO ANGULAR
       </div>
     </div>
   );

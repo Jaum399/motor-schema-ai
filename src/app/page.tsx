@@ -192,6 +192,19 @@ export default function Home() {
     window.location.assign(url);
   }
 
+  function openSchemaPreview() {
+    if (!result?.schemaImageUrl) {
+      return;
+    }
+
+    if (isAppMode) {
+      openInApp(result.schemaImageUrl);
+      return;
+    }
+
+    window.open(result.schemaImageUrl, "_blank", "noopener,noreferrer");
+  }
+
   function openSchemaDownload() {
     if (!result?.schemaImageUrl) {
       return;
@@ -300,10 +313,17 @@ export default function Home() {
               </button>
               <button
                 type="button"
+                onClick={openSchemaPreview}
+                className="rounded-2xl border border-cyan-500/60 bg-cyan-500/10 px-5 py-3 font-semibold text-cyan-100 hover:border-cyan-400"
+              >
+                {isAppMode ? "Abrir imagem no app" : "Abrir imagem"}
+              </button>
+              <button
+                type="button"
                 onClick={openSchemaDownload}
                 className="rounded-2xl border border-slate-700 px-5 py-3 font-semibold text-slate-100 hover:border-cyan-400"
               >
-                {isAppMode ? "Abrir JPG no app" : "Baixar JPG"}
+                Baixar imagem
               </button>
               {!isAppMode ? (
                 <a

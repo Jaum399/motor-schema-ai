@@ -741,7 +741,13 @@ export async function GET(request: Request) {
 
   const componentFocus = mergeUniqueLines(aiBlueprint?.componentFocus, referenceLines).slice(0, 4);
 
-  const title = `${aiMode ? "PRANCHA TECNICA DE OFICINA" : "PRANCHA DE MONTAGEM E TORQUES"} - ${brand} ${model}`.toUpperCase();
+  const normalizedModel = normalizeManualText(model).trim();
+  const normalizedEngine = normalizeManualText(engine).trim();
+  const displayEngineLabel = normalizedModel && normalizedEngine && normalizedModel.toLowerCase() !== normalizedEngine.toLowerCase()
+    ? `${brand} ${normalizedEngine} (${normalizedModel})`
+    : `${brand} ${normalizedModel || normalizedEngine}`;
+
+  const title = `${aiMode ? "GUIA TECNICO DE MONTAGEM E TORQUES" : "GUIA TECNICO DE MONTAGEM E TORQUES"} - MOTOR ${displayEngineLabel}`.toUpperCase();
   const geminiIllustration = aiMode && aiBlueprint
     ? await generateGeminiMechanicalBase({
         brand,
