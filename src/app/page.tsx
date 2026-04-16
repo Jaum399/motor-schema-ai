@@ -66,7 +66,10 @@ type SearchForm = {
 const presets: SearchForm[] = [
   { label: "Iveco F3B 380", brand: "Iveco", engine: "F3B 380", model: "Cursor 13" },
   { label: "Mercedes OM352", brand: "Mercedes-Benz", engine: "OM352", model: "OM352" },
+  { label: "Mercedes OM457", brand: "Mercedes-Benz", engine: "OM457", model: "OM457" },
+  { label: "Volvo D13", brand: "Volvo", engine: "D13", model: "D13" },
   { label: "Scania DC12 420", brand: "Scania", engine: "DC12 420", model: "124 420" },
+  { label: "Scania V8", brand: "Scania", engine: "V8", model: "V8" },
   { label: "MWM X10", brand: "MWM", engine: "X10 6 cilindros", model: "X10" },
   { label: "Cummins 6TAA", brand: "Cummins", engine: "6TAA 6.304", model: "6TAA 6.304" },
   { label: "Mercedes G211", brand: "Mercedes-Benz", engine: "G211-16 Câmbio", model: "G211-16" },
@@ -195,8 +198,8 @@ export default function Home() {
                 Esquemas detalhados estilo manual de oficina
               </h1>
               <p className="max-w-2xl text-sm text-slate-300 sm:text-base">
-                Informe a marca e o motor para gerar um esquema técnico detalhado, focado apenas na ilustração mecânica,
-                com visual explicativo semelhante aos modelos enviados.
+                Informe a marca e o motor para gerar um esquema técnico detalhado, com padrão visual inspirado no manual
+                do OM352, mais detalhes mecânicos no desenho e variações para outros motores da linha diesel.
               </p>
             </div>
             <div className="grid gap-3 text-sm text-slate-200 sm:grid-cols-3">
@@ -249,7 +252,7 @@ export default function Home() {
                 onClick={handleGenerateWithAI}
                 className="rounded-2xl bg-violet-500 px-5 py-3 font-semibold text-white hover:bg-violet-400"
               >
-                {aiLoading ? "IA gerando..." : "Gerar por IA"}
+                {aiLoading ? "Gemini gerando..." : "Gerar com Gemini"}
               </button>
               <a
                 href={result?.schemaImageUrl ? `${result.schemaImageUrl}&download=1` : "#"}

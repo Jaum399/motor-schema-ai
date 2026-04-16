@@ -5,6 +5,7 @@ import sharp from "sharp";
 import { getEngineById } from "@/data/engines";
 import { findKnowledgeEntries } from "@/data/knowledge-base";
 import { createValveDiagramElement } from "@/lib/valve-diagram-template";
+import { generateAiBlueprint, generateGeminiMechanicalBase } from "@/lib/ai-schema";
 
 export const runtime = "nodejs";
 
@@ -171,6 +172,45 @@ function buildBalanceProcedure() {
     { balance: "5", regular: "2" },
     { balance: "3", regular: "4" },
   ];
+}
+
+function mergeUniqueLines(...groups: Array<string[] | undefined>) {
+  const seen = new Set<string>();
+
+  return groups
+    .flatMap((group) => group || [])
+    .map((line) => normalizeManualText(line).trim())
+    .filter(Boolean)
+    .filter((line) => {
+      const key = line.toLowerCase();
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
+}
+
+function inferLayoutFlavor({
+  brand,
+  model,
+  engine,
+  title,
+  isGearbox,
+}: {
+  brand: string;
+  model: string;
+  engine: string;
+  title?: string;
+  isGearbox: boolean;
+}) {
+  if (isGearbox) return "gearbox" as const;
+
+  const combined = normalizeManualText([brand, model, engine, title || ""].join(" ")).toLowerCase();
+
+  if (/v8|dc16|dsc/.test(combined)) return "v-engine" as const;
+  if (/valv|regul|folga|balanc|om352|x10|6taa/.test(combined)) return "valve" as const;
+  return "inline" as const;
 }
 
 function renderValveRegulationSheet({
@@ -344,6 +384,8 @@ function renderAssemblySheet({
   matchedApplication,
   matchedYears,
   aiMode,
+  geminiIllustration,
+  componentFocus,
 }: {
   title: string;
   engine: string;
@@ -357,6 +399,8 @@ function renderAssemblySheet({
   matchedApplication: string;
   matchedYears: string;
   aiMode: boolean;
+  geminiIllustration?: string | null;
+  componentFocus?: string[];
 }) {
   const fontCss = getEmbeddedFontCss();
 
@@ -375,8 +419,13 @@ function renderAssemblySheet({
 
     <rect x="40" y="150" width="920" height="480" rx="18" fill="#f8fafc" stroke="#d1d5db" stroke-width="3" />
     <rect x="40" y="150" width="920" height="54" rx="18" fill="#bdebf0" />
-    <text x="65" y="187" fill="#111827" font-size="28" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(isGearbox ? "CONJUNTO PRINCIPAL E EIXOS" : "BLOCO E PARTE INFERIOR")}</text>
-    <text x="70" y="245" fill="#111827" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(isGearbox ? "EIXO PILOTO / EIXO PRINCIPAL" : "BRONZINAS DE MANCAL E VIRABREQUIM")}</text>
+    <text x="65" y="187" fill="#111827" font-size="28" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(isGearbox ? "CONJUNTO PRINCIPAL E EIXOS" : "BLOCO, CABECOTE E DESENHO MECANICO")}</text>
+    <text x="70" y="245" fill="#111827" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(isGearbox ? "EIXO PILOTO / EIXO PRINCIPAL" : "VISTA MECANICA COMPLETA COM REFERENCIA DE OFICINA")}</text>
+    ${geminiIllustration ? `
+      <rect x="72" y="268" width="620" height="290" rx="16" fill="#dbe4ea" stroke="#334155" stroke-width="2" />
+      <image x="82" y="278" width="600" height="270" href="${geminiIllustration}" preserveAspectRatio="xMidYMid slice" />
+      <text x="84" y="585" fill="#0f172a" font-size="16" font-family="DejaVu Sans, sans-serif" font-weight="700">BASE MECANICA GERADA PELO GEMINI API</text>
+    ` : ""}
 
     <g transform="translate(85,270)">
       <rect x="0" y="130" width="650" height="150" rx="12" fill="#98a5aa" />
@@ -472,11 +521,93 @@ function renderAssemblySheet({
       `Aplicacao: ${matchedApplication}`,
       `Anos de referencia: ${matchedYears}`,
       referenceLines[0] || "Consulta cruzada em bases publicas e internas.",
-      aiMode ? "Modo IA ativo com sintese tecnica e linguagem de oficina." : "Modo catalogo tecnico com estrutura pronta para consulta rapida.",
+      ...(componentFocus?.slice(0, 2).map((item) => `Foco mecanico: ${item}`) || []),
+      aiMode ? "Modo IA ativo com sintese tecnica, referencia OM352 e estilo de manual." : "Modo catalogo tecnico com estrutura pronta para consulta rapida.",
     ], x: 80, startY: 1085, color: "#dbeafe", size: 20, weight: 700, maxChars: 100, gap: 12 })}
 
     <rect x="40" y="1370" width="2120" height="70" rx="14" fill="#facc15" opacity="0.22" />
     <text x="70" y="1415" fill="#111827" font-size="24" font-family="DejaVu Sans, sans-serif" font-weight="700">DICA: USE OLEO LIMPO NAS ROSCAS, CONFIRA REFERENCIAS DE PMS E SUBSTITUA FIXADORES COM APERTO ANGULAR SEMPRE QUE NECESSARIO.</text>
+  </svg>`;
+}
+
+function renderVEngineServiceSheet({
+  title,
+  engine,
+  torqueSpecs,
+  measureLines,
+  noteLines,
+  referenceLines,
+  geminiIllustration,
+  componentFocus,
+}: {
+  title: string;
+  engine: string;
+  torqueSpecs: { component: string; sequence: string; value: string }[];
+  measureLines: string[];
+  noteLines: string[];
+  referenceLines: string[];
+  geminiIllustration?: string | null;
+  componentFocus?: string[];
+}) {
+  const fontCss = getEmbeddedFontCss();
+
+  return `
+  <svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1500" viewBox="0 0 2200 1500" role="img" aria-label="Manual tecnico motor V8">
+    <style>${fontCss}</style>
+    <rect width="2200" height="1500" rx="24" fill="#eef2f4" />
+    <rect x="20" y="16" width="2160" height="94" rx="14" fill="#f8fafc" stroke="#0f172a" stroke-width="3" />
+    <text x="1100" y="76" text-anchor="middle" fill="#0f172a" font-size="48" font-family="DejaVu Sans, sans-serif" font-weight="800">${escapeXml(title)}</text>
+
+    <rect x="40" y="150" width="840" height="700" rx="18" fill="#f8fafc" stroke="#cbd5e1" stroke-width="3" />
+    <rect x="920" y="150" width="1240" height="700" rx="18" fill="#f8fafc" stroke="#cbd5e1" stroke-width="3" />
+    <rect x="40" y="890" width="2120" height="420" rx="18" fill="#0f2f3d" />
+
+    <text x="70" y="195" fill="#111827" font-size="28" font-family="DejaVu Sans, sans-serif" font-weight="800">VISTA EXPLODIDA DAS BANCADAS</text>
+    <text x="960" y="195" fill="#111827" font-size="28" font-family="DejaVu Sans, sans-serif" font-weight="800">TORQUES, SINCRONISMO E CONTROLES</text>
+
+    <g transform="translate(120,240)">
+      <rect x="120" y="70" width="200" height="340" rx="24" fill="#d7dee4" stroke="#334155" stroke-width="3" transform="rotate(-18 220 240)" />
+      <rect x="400" y="70" width="200" height="340" rx="24" fill="#d7dee4" stroke="#334155" stroke-width="3" transform="rotate(18 500 240)" />
+      ${[1, 2, 3, 4].map((num, index) => `
+        <circle cx="${185 + index * 28}" cy="${120 + index * 72}" r="26" fill="#9aa8b4" stroke="#334155" stroke-width="3" />
+        <text x="${185 + index * 28}" y="${129 + index * 72}" text-anchor="middle" fill="#ffffff" font-size="20" font-family="DejaVu Sans, sans-serif" font-weight="700">${num}</text>
+      `).join("")}
+      ${[5, 6, 7, 8].map((num, index) => `
+        <circle cx="${535 - index * 28}" cy="${120 + index * 72}" r="26" fill="#9aa8b4" stroke="#334155" stroke-width="3" />
+        <text x="${535 - index * 28}" y="${129 + index * 72}" text-anchor="middle" fill="#ffffff" font-size="20" font-family="DejaVu Sans, sans-serif" font-weight="700">${num}</text>
+      `).join("")}
+      <rect x="250" y="210" width="220" height="80" rx="20" fill="#c7d2da" stroke="#334155" stroke-width="3" />
+      <circle cx="360" cy="250" r="44" fill="#8a98a3" stroke="#334155" stroke-width="4" />
+      <text x="360" y="257" text-anchor="middle" fill="#ffffff" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="800">TURBO</text>
+      <text x="100" y="460" fill="#111827" font-size="20" font-family="DejaVu Sans, sans-serif" font-weight="700">BANCO A</text>
+      <text x="520" y="460" fill="#111827" font-size="20" font-family="DejaVu Sans, sans-serif" font-weight="700">BANCO B</text>
+    </g>
+
+    ${geminiIllustration ? `
+      <rect x="88" y="590" width="740" height="220" rx="16" fill="#dbe4ea" stroke="#334155" stroke-width="2" />
+      <image x="98" y="600" width="720" height="200" href="${geminiIllustration}" preserveAspectRatio="xMidYMid slice" />
+      <text x="105" y="832" fill="#0f172a" font-size="16" font-family="DejaVu Sans, sans-serif" font-weight="700">REFERENCIA MECANICA V8 VIA GEMINI API</text>
+    ` : ""}
+
+    <rect x="960" y="230" width="530" height="260" rx="16" fill="#eef6fa" stroke="#334155" stroke-width="2" />
+    <text x="985" y="268" fill="#111827" font-size="22" font-family="DejaVu Sans, sans-serif" font-weight="800">SEQUENCIA DE APERTO</text>
+    ${renderWrappedLines({ lines: torqueSpecs.map((item) => `${item.component}: ${item.value}`), x: 985, startY: 308, color: "#0f172a", size: 18, weight: 700, maxChars: 34, gap: 8 })}
+
+    <rect x="1515" y="230" width="600" height="260" rx="16" fill="#eef6fa" stroke="#334155" stroke-width="2" />
+    <text x="1540" y="268" fill="#111827" font-size="22" font-family="DejaVu Sans, sans-serif" font-weight="800">PONTOS DE CONTROLE</text>
+    ${renderWrappedLines({ lines: componentFocus?.length ? componentFocus : referenceLines, x: 1540, startY: 308, color: "#0f172a", size: 18, weight: 700, maxChars: 36, gap: 8 })}
+
+    <rect x="960" y="520" width="1155" height="290" rx="16" fill="#f8fafc" stroke="#334155" stroke-width="2" />
+    <text x="985" y="560" fill="#111827" font-size="22" font-family="DejaVu Sans, sans-serif" font-weight="800">MEDICOES E OBSERVACOES</text>
+    ${renderWrappedLines({ lines: [...measureLines, ...noteLines].slice(0, 8), x: 985, startY: 602, color: "#1f2937", size: 18, weight: 700, maxChars: 72, gap: 10 })}
+
+    <text x="70" y="950" fill="#f8fafc" font-size="30" font-family="DejaVu Sans, sans-serif" font-weight="800">RESUMO TECNICO DO ${escapeXml(engine.toUpperCase())}</text>
+    ${renderWrappedLines({ lines: [
+      referenceLines[0] || "Aplicacao pesada com bancada dupla e sincronismo rigoroso.",
+      referenceLines[1] || "Executar travamento correto das referencias antes do torque final.",
+      noteLines[0] || "Conferir fechamento cruzado das bancadas.",
+      noteLines[1] || "Revisar folgas, lubrificacao e vedacao final.",
+    ], x: 80, startY: 1000, color: "#dbeafe", size: 22, weight: 700, maxChars: 95, gap: 12 })}
   </svg>`;
 }
 
@@ -493,16 +624,22 @@ export async function GET(request: Request) {
   const knowledge = findKnowledgeEntries(brand, engine);
   const primaryKnowledge = knowledge[0];
   const isGearbox = primaryKnowledge?.category === "gearbox";
-  const isValveFocused = !isGearbox && /valv|regul|folga|balanc|om352|x10/i.test(
-    normalizeManualText([
-      brand,
-      model,
-      engine,
-      primaryKnowledge?.title || "",
-      ...(primaryKnowledge?.valveSpecs || []),
-      ...(matched?.checklist || []),
-    ].join(" ")).toLowerCase()
-  );
+  const aiBlueprint = aiMode
+    ? await generateAiBlueprint({
+        record: matched,
+        brand,
+        engine,
+      })
+    : null;
+  const layoutFlavor = aiBlueprint?.layoutHint || inferLayoutFlavor({
+    brand,
+    model,
+    engine,
+    title: primaryKnowledge?.title,
+    isGearbox,
+  });
+  const isValveFocused = layoutFlavor === "valve";
+  const isVEngine = layoutFlavor === "v-engine";
 
   const checklist = (matched?.checklist || [
     "Validar bronzinas e folgas antes do fechamento final",
@@ -526,34 +663,55 @@ export async function GET(request: Request) {
         { component: "Bielas", sequence: "Par graduado", value: "60 Nm -> 120 Nm -> 90 deg" },
       ]).slice(0, 4);
 
-  const noteLines = (primaryKnowledge?.mountingTips?.length
-    ? primaryKnowledge.mountingTips
-    : matched?.notes || [
-        "Usar oleo limpo nas roscas e substituir parafusos com aperto angular.",
-        "Conferir planicidade e altura nominal do cabecote antes da junta.",
-        "Executar reaperto e sincronismo somente com referencias travadas.",
-      ]).slice(0, 4);
+  const referenceLines = mergeUniqueLines(
+    primaryKnowledge?.partCodes?.length
+      ? primaryKnowledge.partCodes
+      : [
+          `Aplicacao: ${matched?.application || "linha diesel pesada"}`,
+          `Familia: ${matched?.family || "diesel pesado"}`,
+          `Anos: ${matched?.years || "referencia tecnica"}`,
+        ]
+  ).slice(0, 4);
 
-  const measureLines = (primaryKnowledge?.measurements?.length
-    ? primaryKnowledge.measurements
-    : [
-        "Verificar altura do cabecote e planicidade maxima permitida.",
-        "Medir projecao do pistao no PMS para escolha correta da junta.",
-        "Conferir diferenca maxima entre cilindros com relogio comparador.",
-        "Registrar todas as medicoes antes do fechamento final.",
-      ]).slice(0, 4);
+  const noteLines = mergeUniqueLines(
+    aiBlueprint?.warnings,
+    primaryKnowledge?.mountingTips?.length
+      ? primaryKnowledge.mountingTips
+      : matched?.notes || [
+          "Usar oleo limpo nas roscas e substituir parafusos com aperto angular.",
+          "Conferir planicidade e altura nominal do cabecote antes da junta.",
+          "Executar reaperto e sincronismo somente com referencias travadas.",
+        ]
+  ).slice(0, 4);
 
-  const regulationLines = (primaryKnowledge?.valveSpecs?.length ? primaryKnowledge.valveSpecs : checklist).slice(0, 4);
+  const measureLines = mergeUniqueLines(
+    aiBlueprint?.detailLines,
+    primaryKnowledge?.measurements?.length
+      ? primaryKnowledge.measurements
+      : [
+          "Verificar altura do cabecote e planicidade maxima permitida.",
+          "Medir projecao do pistao no PMS para escolha correta da junta.",
+          "Conferir diferenca maxima entre cilindros com relogio comparador.",
+          "Registrar todas as medicoes antes do fechamento final.",
+        ]
+  ).slice(0, 4);
 
-  const referenceLines = (primaryKnowledge?.partCodes?.length
-    ? primaryKnowledge.partCodes
-    : [
-        `Aplicacao: ${matched?.application || "linha diesel pesada"}`,
-        `Familia: ${matched?.family || "diesel pesado"}`,
-        `Anos: ${matched?.years || "referencia tecnica"}`,
-      ]).slice(0, 4);
+  const regulationLines = mergeUniqueLines(
+    aiBlueprint?.recommendedSequence,
+    primaryKnowledge?.valveSpecs?.length ? primaryKnowledge.valveSpecs : checklist
+  ).slice(0, 6);
+
+  const componentFocus = mergeUniqueLines(aiBlueprint?.componentFocus, referenceLines).slice(0, 4);
 
   const title = `${aiMode ? "GUIA TECNICO GERADO POR IA" : "GUIA TECNICO DE MONTAGEM E TORQUES"} - ${brand} ${model}`.toUpperCase();
+  const geminiIllustration = aiMode && aiBlueprint
+    ? await generateGeminiMechanicalBase({
+        brand,
+        model,
+        engine,
+        blueprint: aiBlueprint,
+      })
+    : null;
 
   let imageBuffer: Buffer;
 
@@ -570,6 +728,7 @@ export async function GET(request: Request) {
         exhaust: clearances.exhaust,
         notes: noteLines,
         procedure: buildBalanceProcedure(),
+        illustrationDataUrl: geminiIllustration,
       }),
       {
         width: 2200,
@@ -592,20 +751,33 @@ export async function GET(request: Request) {
     const pngBuffer = Buffer.from(await imageResponse.arrayBuffer());
     imageBuffer = await sharp(pngBuffer).jpeg({ quality: 97, mozjpeg: true }).toBuffer();
   } else {
-    const svg = renderAssemblySheet({
-      title,
-      engine,
-      isGearbox,
-      torqueSpecs,
-      regulationLines,
-      measureLines,
-      noteLines,
-      referenceLines,
-      matchedFamily: matched?.family || (isGearbox ? "Transmissao pesada" : "Diesel pesado"),
-      matchedApplication: matched?.application || primaryKnowledge?.summary || "Consulta tecnica assistida",
-      matchedYears: matched?.years || "Base tecnica consolidada",
-      aiMode,
-    });
+    const svg = isVEngine
+      ? renderVEngineServiceSheet({
+          title,
+          engine,
+          torqueSpecs,
+          measureLines,
+          noteLines,
+          referenceLines,
+          geminiIllustration,
+          componentFocus,
+        })
+      : renderAssemblySheet({
+          title,
+          engine,
+          isGearbox,
+          torqueSpecs,
+          regulationLines,
+          measureLines,
+          noteLines,
+          referenceLines,
+          matchedFamily: matched?.family || (isGearbox ? "Transmissao pesada" : "Diesel pesado"),
+          matchedApplication: matched?.application || primaryKnowledge?.summary || "Consulta tecnica assistida",
+          matchedYears: matched?.years || "Base tecnica consolidada",
+          aiMode,
+          geminiIllustration,
+          componentFocus,
+        });
 
     imageBuffer = await sharp(Buffer.from(svg, "utf8"))
       .jpeg({ quality: 97, mozjpeg: true })

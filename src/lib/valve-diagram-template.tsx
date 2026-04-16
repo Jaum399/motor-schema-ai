@@ -12,6 +12,7 @@ export function createValveDiagramElement({
   exhaust,
   notes,
   procedure,
+  illustrationDataUrl,
 }: {
   title: string;
   firingOrder: string;
@@ -19,6 +20,7 @@ export function createValveDiagramElement({
   exhaust: string;
   notes: string[];
   procedure: ProcedureItem[];
+  illustrationDataUrl?: string | null;
 }) {
   return (
     <div
@@ -110,33 +112,44 @@ export function createValveDiagramElement({
           <div style={{ display: "flex", flexDirection: "column", border: "3px solid #374151", borderRadius: 16, background: "#f6f7f9", padding: 16, gap: 14, flex: 1 }}>
             <div style={{ display: "flex", justifyContent: "center", fontSize: 24, fontWeight: 800 }}>VISTA GERAL DO MOTOR</div>
             <div style={{ display: "flex", flex: 1, justifyContent: "center", alignItems: "center" }}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-                <div style={{ display: "flex", gap: 10 }}>
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={`t-${index}`} style={{ display: "flex", width: 20, height: 14, borderRadius: 4, background: "#c5d0d8", border: "2px solid #374151" }} />
-                  ))}
+              {illustrationDataUrl ? (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                  <img
+                    src={illustrationDataUrl}
+                    alt="Ilustração mecânica Gemini"
+                    style={{ width: 430, height: 250, objectFit: "cover", borderRadius: 14, border: "3px solid #374151" }}
+                  />
+                  <div style={{ display: "flex", fontSize: 14, fontWeight: 800, color: "#334155" }}>REFERENCIA MECANICA GERADA PELO GEMINI API</div>
                 </div>
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 190, height: 56, borderRadius: 10, background: "#c7d0d8", border: "3px solid #374151" }} />
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: 240, height: 62, borderRadius: 10, background: "#b5bec6", border: "3px solid #374151", padding: "0 12px" }}>
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={`h-${index}`} style={{ display: "flex", width: 18, height: 18, borderRadius: 999, background: "#8594a0", border: "2px solid #374151" }} />
-                  ))}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: 300 }}>
-                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 72, height: 72, borderRadius: 999, background: "#d9dfe5", border: "4px solid #374151" }}>
-                    <div style={{ display: "flex", width: 38, height: 38, borderRadius: 999, background: "#92a0ab", border: "3px solid #374151" }} />
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <div key={`t-${index}`} style={{ display: "flex", width: 20, height: 14, borderRadius: 4, background: "#c5d0d8", border: "2px solid #374151" }} />
+                    ))}
                   </div>
-                  <div style={{ display: "flex", width: 170, height: 180, borderRadius: 18, background: "#bcc6cf", border: "3px solid #374151" }} />
-                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 56, height: 56, borderRadius: 999, background: "#d9dfe5", border: "4px solid #374151" }}>
-                    <div style={{ display: "flex", width: 24, height: 24, borderRadius: 999, background: "#92a0ab", border: "3px solid #374151" }} />
+                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 190, height: 56, borderRadius: 10, background: "#c7d0d8", border: "3px solid #374151" }} />
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: 240, height: 62, borderRadius: 10, background: "#b5bec6", border: "3px solid #374151", padding: "0 12px" }}>
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <div key={`h-${index}`} style={{ display: "flex", width: 18, height: 18, borderRadius: 999, background: "#8594a0", border: "2px solid #374151" }} />
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: 300 }}>
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 72, height: 72, borderRadius: 999, background: "#d9dfe5", border: "4px solid #374151" }}>
+                      <div style={{ display: "flex", width: 38, height: 38, borderRadius: 999, background: "#92a0ab", border: "3px solid #374151" }} />
+                    </div>
+                    <div style={{ display: "flex", width: 170, height: 180, borderRadius: 18, background: "#bcc6cf", border: "3px solid #374151" }} />
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 56, height: 56, borderRadius: 999, background: "#d9dfe5", border: "4px solid #374151" }}>
+                      <div style={{ display: "flex", width: 24, height: 24, borderRadius: 999, background: "#92a0ab", border: "3px solid #374151" }} />
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: 220, height: 74, borderRadius: 12, background: "#c4ced6", border: "3px solid #374151", padding: "0 10px" }}>
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <div key={`r-${index}`} style={{ display: "flex", width: 16, height: 16, borderRadius: 999, background: "#9ca9b4", border: "2px solid #374151" }} />
+                    ))}
                   </div>
                 </div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: 220, height: 74, borderRadius: 12, background: "#c4ced6", border: "3px solid #374151", padding: "0 10px" }}>
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <div key={`r-${index}`} style={{ display: "flex", width: 16, height: 16, borderRadius: 999, background: "#9ca9b4", border: "2px solid #374151" }} />
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
