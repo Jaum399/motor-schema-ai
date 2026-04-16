@@ -26,7 +26,7 @@ async function safeFetchJson(url: string, extraHeaders: Record<string, string> =
         "User-Agent": "motor-schema-ai/1.0",
         ...extraHeaders,
       },
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(3500),
       cache: "no-store",
     });
 
@@ -85,17 +85,16 @@ async function fetchDuckAnswer(term: string) {
 }
 
 async function fetchWikipediaGallery(queries: string[]): Promise<PublicTechImage[]> {
-  const languages = ["pt", "en"];
-  const results: PublicTechImage[] = [];
-
-  for (const query of queries.filter(Boolean)) {
-    for (const language of languages) {
+  const uniqueQueries = Array.from(new Set(queries.filter(Boolean))).slice(0, 3);
+  const requests = uniqueQueries.flatMap((query, index) => {
+    const languages = index === 0 ? ["pt", "en"] : ["en"];
+    return languages.map(async (language) => {
       const payload = await safeFetchJson(
         `https://${language}.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrlimit=4&prop=pageimages|info&piprop=original|thumbnail&pithumbsize=1600&inprop=url&format=json&origin=*`
       );
 
       const pages = Object.values((payload?.query?.pages || {}) as Record<string, any>);
-      const mapped = pages
+      return pages
         .map((page) => ({
           src: page?.original?.source || page?.thumbnail?.source || "",
           title: page?.title || query,
@@ -103,15 +102,11 @@ async function fetchWikipediaGallery(queries: string[]): Promise<PublicTechImage
           sourceUrl: page?.fullurl || null,
         }))
         .filter((item) => Boolean(item.src));
+    });
+  });
 
-      results.push(...mapped);
-      if (results.length >= 6) {
-        return results.slice(0, 6);
-      }
-    }
-  }
-
-  return results.slice(0, 6);
+  const resolved = await Promise.all(requests);
+  return resolved.flat().slice(0, 6);
 }
 
 async function fetchWikimediaImages(term: string): Promise<PublicTechImage[]> {
