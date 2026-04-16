@@ -1,0 +1,8 @@
+.git
+.next
+node_modules
+.android-sdk
+.jdk21
+android/
+sample-*.jpg
+gradle-build*.log
