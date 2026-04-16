@@ -457,6 +457,12 @@ export default function Home() {
           </div>
         </section>
       </main>
+
+      <footer className="border-t border-slate-800 bg-slate-950 px-4 py-6 text-center text-sm text-slate-400 sm:px-6 lg:px-8">
+        <p className="font-semibold text-slate-200">MT Diesel</p>
+        <p>© 2026 MT DIESEL PARANATINGA</p>
+        <p>CNPJ 30.399.905/0001-47</p>
+      </footer>
     </div>
   );
 }
