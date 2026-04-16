@@ -403,6 +403,15 @@ function renderAssemblySheet({
   componentFocus?: string[];
 }) {
   const fontCss = getEmbeddedFontCss();
+  const componentLegend = (componentFocus?.length
+    ? componentFocus
+    : isGearbox
+      ? ["eixo piloto", "sincronizadores", "calcos", "folga axial"]
+      : ["cabecote", "unidades injetoras", "camisas", "biela fraturada"]
+  ).slice(0, 4);
+  const torqueOrder = isGearbox
+    ? ["1", "3", "5", "7", "8", "6", "4", "2"]
+    : ["9", "5", "1", "3", "7", "11", "12", "8", "4", "2", "6", "10"];
 
   return `
   <svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1500" viewBox="0 0 2200 1500" role="img" aria-label="Manual tecnico em JPG">
@@ -428,32 +437,54 @@ function renderAssemblySheet({
       <text x="84" y="585" fill="#0f172a" font-size="16" font-family="DejaVu Sans, sans-serif" font-weight="700">ILUSTRACAO TECNICA REFINADA VIA GEMINI</text>
     ` : ""}
 
-    <g transform="translate(78,252)">
-      <rect x="42" y="118" width="620" height="170" rx="18" fill="#99a7ad" stroke="#334155" stroke-width="3" />
-      <rect x="118" y="38" width="430" height="88" rx="18" fill="#dbe4ea" stroke="#334155" stroke-width="3" />
+    <g transform="translate(60,224)">
+      <rect x="30" y="38" width="600" height="70" rx="18" fill="#d9e2e8" stroke="#334155" stroke-width="3" />
+      <rect x="85" y="102" width="500" height="84" rx="16" fill="#c6d1d8" stroke="#334155" stroke-width="3" />
       ${Array.from({ length: 6 }).map((_, index) => {
-        const x = 140 + index * 64;
-        return `<rect x="${x}" y="16" width="16" height="26" rx="6" fill="#94a3ad" stroke="#334155" stroke-width="2" />
-                <circle cx="${x + 8}" cy="67" r="14" fill="#7c8c97" stroke="#334155" stroke-width="2" />
-                <line x1="${x + 8}" y1="-2" x2="${x + 8}" y2="28" stroke="#c2410c" stroke-width="3" marker-end="url(#arrow)" />
-                <circle cx="${x + 8}" cy="-6" r="14" fill="#f59e0b" /><text x="${x + 3}" y="0" fill="#374151" font-size="15" font-family="DejaVu Sans, sans-serif" font-weight="700">${index + 1}</text>`;
+        const x = 110 + index * 76;
+        return `<rect x="${x}" y="48" width="18" height="30" rx="6" fill="#95a4ae" stroke="#334155" stroke-width="2" />
+                <circle cx="${x + 9}" cy="124" r="13" fill="#7a8a95" stroke="#334155" stroke-width="2" />
+                <line x1="${x + 9}" y1="18" x2="${x + 9}" y2="48" stroke="#d97706" stroke-width="3" marker-end="url(#arrow)" />
+                <circle cx="${x + 9}" cy="12" r="15" fill="#f1a24e" stroke="#9a5808" stroke-width="2" />
+                <text x="${x + 4}" y="17" fill="#1f2937" font-size="15" font-family="DejaVu Sans, sans-serif" font-weight="800">${index + 1}</text>`;
       }).join("")}
-      <rect x="150" y="140" width="380" height="68" rx="12" fill="#bcc8cf" stroke="#334155" stroke-width="3" />
-      ${Array.from({ length: 6 }).map((_, index) => `<circle cx="${175 + index * 58}" cy="174" r="12" fill="#8796a1" stroke="#334155" stroke-width="2" />`).join("")}
-      <circle cx="88" cy="206" r="58" fill="#d7dee4" stroke="#334155" stroke-width="4" />
-      <circle cx="88" cy="206" r="28" fill="#94a3ad" stroke="#334155" stroke-width="3" />
-      <circle cx="595" cy="192" r="48" fill="#d7dee4" stroke="#334155" stroke-width="4" />
-      <circle cx="595" cy="192" r="22" fill="#94a3ad" stroke="#334155" stroke-width="3" />
-      <path d="M530 145 C585 120, 620 115, 650 140" fill="none" stroke="#475569" stroke-width="5" />
-      <path d="M150 236 C210 255, 450 255, 525 228" fill="none" stroke="#475569" stroke-width="6" />
-      <rect x="250" y="216" width="180" height="110" rx="18" fill="#c8d1d7" stroke="#334155" stroke-width="3" />
-      <text x="254" y="352" fill="#111827" font-size="16" font-family="DejaVu Sans, sans-serif" font-weight="700">CORPO PRINCIPAL • VISTA MECANICA</text>
+      <rect x="58" y="180" width="556" height="172" rx="18" fill="#95a4ae" stroke="#334155" stroke-width="3" />
+      <rect x="120" y="208" width="360" height="64" rx="12" fill="#bcc8cf" stroke="#334155" stroke-width="3" />
+      ${Array.from({ length: 6 }).map((_, index) => `<circle cx="${145 + index * 55}" cy="240" r="11" fill="#8796a1" stroke="#334155" stroke-width="2" />`).join("")}
+      ${Array.from({ length: 6 }).map((_, index) => {
+        const x = 118 + index * 72;
+        return `<rect x="${x}" y="282" width="32" height="58" rx="8" fill="#dfe5ea" stroke="#334155" stroke-width="2" />
+                <rect x="${x + 4}" y="300" width="24" height="32" rx="6" fill="#f3c58d" stroke="#8c5a2b" stroke-width="2" />`;
+      }).join("")}
+      <path d="M118 350 C180 390, 490 390, 548 350" fill="none" stroke="#475569" stroke-width="8" />
+      <path d="M145 350 Q175 372 205 350 T265 350 T325 350 T385 350 T445 350 T505 350" fill="none" stroke="#1f2937" stroke-width="6" />
+      <circle cx="58" cy="250" r="56" fill="#d7dee4" stroke="#334155" stroke-width="4" />
+      <circle cx="58" cy="250" r="24" fill="#94a3ad" stroke="#334155" stroke-width="3" />
+      <circle cx="608" cy="238" r="50" fill="#d7dee4" stroke="#334155" stroke-width="4" />
+      <circle cx="608" cy="238" r="22" fill="#94a3ad" stroke="#334155" stroke-width="3" />
+      <path d="M610 186 C660 150, 695 148, 730 170" fill="none" stroke="#475569" stroke-width="5" />
+      <line x1="650" y1="116" x2="720" y2="116" stroke="#475569" stroke-width="3" />
+      <line x1="650" y1="170" x2="720" y2="170" stroke="#475569" stroke-width="3" />
+      <text x="660" y="109" fill="#1f2937" font-size="16" font-family="DejaVu Sans, sans-serif" font-weight="700">TURBO / GEAR</text>
+      <text x="662" y="189" fill="#1f2937" font-size="16" font-family="DejaVu Sans, sans-serif" font-weight="700">TREM DIANTEIRO</text>
+      <rect x="390" y="16" width="250" height="180" rx="12" fill="#efe5d0" stroke="#c5b89c" stroke-width="2" />
+      <text x="406" y="46" fill="#1f2937" font-size="16" font-family="DejaVu Sans, sans-serif" font-weight="800">LEGENDA DE MONTAGEM</text>
+      ${componentLegend.map((item, index) => `<text x="408" y="${78 + index * 30}" fill="#7c2d12" font-size="16" font-family="DejaVu Sans, sans-serif" font-weight="700">${index + 1}. ${escapeXml(item.toUpperCase())}</text>`).join("")}
+      <text x="164" y="390" fill="#111827" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="700">VISTA EXPLODIDA DE BLOCO, CAMISAS, CABECOTE E ACIONAMENTO</text>
     </g>
 
-    <rect x="740" y="285" width="190" height="215" rx="12" fill="#fff7ed" stroke="#d6d3d1" stroke-width="2" />
-    <text x="760" y="318" fill="#111827" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="700">SEQUENCIA</text>
-    <text x="760" y="348" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="500">DO CENTRO PARA FORA</text>
-    ${renderWrappedLines({ lines: torqueSpecs.map((item, index) => `${index + 1}a etapa: ${item.value}`), x: 760, startY: 390, color: "#7c2d12", size: 16, weight: 700, maxChars: 20, gap: 10 })}
+    <rect x="720" y="250" width="220" height="285" rx="12" fill="#fff7ed" stroke="#d6d3d1" stroke-width="2" />
+    <text x="742" y="282" fill="#111827" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="800">SEQUENCIA DE APERTO</text>
+    <text x="742" y="306" fill="#374151" font-size="15" font-family="DejaVu Sans, sans-serif" font-weight="700">CENTRO PARA FORA</text>
+    ${torqueOrder.map((num, index) => {
+      const columns = isGearbox ? 4 : 6;
+      const col = index % columns;
+      const row = Math.floor(index / columns);
+      const cx = 742 + col * 30;
+      const cy = 336 + row * 38;
+      return `<circle cx="${cx}" cy="${cy}" r="12" fill="#f1a24e" stroke="#9a5808" stroke-width="2" /><text x="${cx - 4}" y="${cy + 5}" fill="#1f2937" font-size="13" font-family="DejaVu Sans, sans-serif" font-weight="800">${num}</text>`;
+    }).join("")}
+    ${renderWrappedLines({ lines: torqueSpecs.map((item, index) => `${index + 1}a etapa: ${item.value}`), x: 742, startY: 420, color: "#7c2d12", size: 15, weight: 700, maxChars: 24, gap: 8 })}
 
     <rect x="980" y="150" width="540" height="250" rx="18" fill="#f8fafc" stroke="#d1d5db" stroke-width="3" />
     <rect x="980" y="150" width="540" height="54" rx="18" fill="#bdebf0" />
@@ -504,12 +535,15 @@ function renderAssemblySheet({
     <rect x="40" y="655" width="920" height="305" rx="18" fill="#f8fafc" stroke="#d1d5db" stroke-width="3" />
     <rect x="40" y="655" width="920" height="54" rx="18" fill="#bdebf0" />
     <text x="65" y="692" fill="#111827" font-size="28" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(isGearbox ? "FIXACAO E FECHAMENTO" : "BIELAS E TORQUES")}</text>
-    <g transform="translate(70,735)">
-      <circle cx="85" cy="145" r="48" fill="none" stroke="#374151" stroke-width="12" />
-      <rect x="118" y="30" width="82" height="165" rx="18" transform="rotate(25 159 110)" fill="#d8dee6" stroke="#374151" stroke-width="4" />
-      <circle cx="216" cy="45" r="28" fill="none" stroke="#374151" stroke-width="10" />
-      <text x="270" y="55" fill="#111827" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="700">APERTO EM ESTAGIOS</text>
-      ${renderWrappedLines({ lines: torqueSpecs.map((item) => `${item.component}: ${item.value}`), x: 270, startY: 95, color: "#1f2937", size: 18, weight: 700, maxChars: 38, gap: 8 })}
+    <g transform="translate(70,720)">
+      <circle cx="88" cy="150" r="44" fill="none" stroke="#374151" stroke-width="10" />
+      <rect x="124" y="42" width="84" height="162" rx="18" transform="rotate(25 166 123)" fill="#d8dee6" stroke="#374151" stroke-width="4" />
+      <circle cx="218" cy="52" r="26" fill="none" stroke="#374151" stroke-width="9" />
+      <rect x="28" y="228" width="230" height="42" rx="10" fill="#efe5d0" stroke="#c5b89c" stroke-width="2" />
+      <text x="48" y="255" fill="#7c2d12" font-size="16" font-family="DejaVu Sans, sans-serif" font-weight="800">BIELA, PISTAO E ORIENTACAO</text>
+      <text x="290" y="55" fill="#111827" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="800">TORQUES DE FECHAMENTO</text>
+      ${renderWrappedLines({ lines: torqueSpecs.map((item) => `${item.component}: ${item.value}`), x: 290, startY: 94, color: "#1f2937", size: 18, weight: 700, maxChars: 40, gap: 8 })}
+      ${renderWrappedLines({ lines: noteLines.slice(0, 2), x: 290, startY: 220, color: "#7c2d12", size: 16, weight: 700, maxChars: 48, gap: 8 })}
     </g>
 
     <rect x="1545" y="845" width="615" height="115" rx="18" fill="#f8fafc" stroke="#d1d5db" stroke-width="3" />
@@ -706,7 +740,7 @@ export async function GET(request: Request) {
 
   const componentFocus = mergeUniqueLines(aiBlueprint?.componentFocus, referenceLines).slice(0, 4);
 
-  const title = `${aiMode ? "GUIA TECNICO GERADO POR IA" : "GUIA TECNICO DE MONTAGEM E TORQUES"} - ${brand} ${model}`.toUpperCase();
+  const title = `${aiMode ? "PRANCHA TECNICA DE OFICINA" : "PRANCHA DE MONTAGEM E TORQUES"} - ${brand} ${model}`.toUpperCase();
   const geminiIllustration = aiMode && aiBlueprint
     ? await generateGeminiMechanicalBase({
         brand,
