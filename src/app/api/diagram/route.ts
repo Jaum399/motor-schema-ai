@@ -9,6 +9,10 @@ function normalizeManualText(value: string) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/•/g, " - ")
+    .replace(/→/g, " -> ")
+    .replace(/°/g, " deg")
+    .replace(/[ª]/g, "a")
+    .replace(/[º]/g, "o")
     .replace(/[“”]/g, '"')
     .replace(/[‘’]/g, "'");
 }
@@ -71,7 +75,7 @@ function renderWrappedLines({
   for (const item of lines) {
     const wrapped = wrapText(item, maxChars);
     wrapped.forEach((line, index) => {
-      output += `<text x="${x}" y="${cursorY + index * (size + 6)}" fill="${color}" font-size="${size}" font-family="Arial, Helvetica, sans-serif" font-weight="${weight}">${escapeXml(line)}</text>`;
+      output += `<text x="${x}" y="${cursorY + index * (size + 6)}" fill="${color}" font-size="${size}" font-family="DejaVu Sans, sans-serif" font-style="normal" font-weight="${weight}">${escapeXml(line)}</text>`;
     });
     cursorY += wrapped.length * (size + 6) + gap;
   }
@@ -153,13 +157,13 @@ export async function GET(request: Request) {
     </defs>
 
     <rect width="2200" height="1500" rx="22" fill="#efefea" />
-    <text x="60" y="78" fill="#111827" font-size="56" font-family="Arial, Helvetica, sans-serif" font-weight="700">${escapeXml(title)}</text>
-    <text x="60" y="116" fill="#334155" font-size="24" font-family="Arial, Helvetica, sans-serif" font-weight="500">${escapeXml(engine.toUpperCase())} - PADRAO VISUAL DE MANUAL TECNICO - PORTUGUES BRASIL</text>
+    <text x="60" y="78" fill="#111827" font-size="56" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(title)}</text>
+    <text x="60" y="116" fill="#334155" font-size="24" font-family="DejaVu Sans, sans-serif" font-weight="500">${escapeXml(engine.toUpperCase())} - PADRAO VISUAL DE MANUAL TECNICO - PORTUGUES BRASIL</text>
 
     <rect x="40" y="150" width="920" height="480" rx="18" fill="#f8fafc" stroke="#d1d5db" stroke-width="3" />
     <rect x="40" y="150" width="920" height="54" rx="18" fill="#bdebf0" />
-    <text x="65" y="187" fill="#111827" font-size="28" font-family="Arial, Helvetica, sans-serif" font-weight="700">${escapeXml(isGearbox ? "CONJUNTO PRINCIPAL E EIXOS" : "BLOCO E PARTE INFERIOR")}</text>
-    <text x="70" y="245" fill="#111827" font-size="18" font-family="Arial, Helvetica, sans-serif" font-weight="700">${escapeXml(isGearbox ? "EIXO PILOTO / EIXO PRINCIPAL" : "BRONZINAS DE MANCAL E VIRABREQUIM")}</text>
+    <text x="65" y="187" fill="#111827" font-size="28" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(isGearbox ? "CONJUNTO PRINCIPAL E EIXOS" : "BLOCO E PARTE INFERIOR")}</text>
+    <text x="70" y="245" fill="#111827" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(isGearbox ? "EIXO PILOTO / EIXO PRINCIPAL" : "BRONZINAS DE MANCAL E VIRABREQUIM")}</text>
 
     <g transform="translate(85,270)">
       <rect x="0" y="130" width="650" height="150" rx="12" fill="#98a5aa" />
@@ -174,22 +178,22 @@ export async function GET(request: Request) {
       <line x1="350" y1="5" x2="350" y2="52" stroke="#c2410c" stroke-width="4" marker-end="url(#arrow)" />
       <line x1="460" y1="5" x2="460" y2="52" stroke="#c2410c" stroke-width="4" marker-end="url(#arrow)" />
       <line x1="570" y1="5" x2="570" y2="52" stroke="#c2410c" stroke-width="4" marker-end="url(#arrow)" />
-      <circle cx="130" cy="0" r="18" fill="#f59e0b" /><text x="124" y="6" fill="#374151" font-size="17" font-family="Arial, Helvetica, sans-serif" font-weight="600">1</text>
-      <circle cx="240" cy="0" r="18" fill="#f59e0b" /><text x="234" y="6" fill="#374151" font-size="17" font-family="Arial, Helvetica, sans-serif" font-weight="600">2</text>
-      <circle cx="350" cy="0" r="18" fill="#f59e0b" /><text x="344" y="6" fill="#374151" font-size="17" font-family="Arial, Helvetica, sans-serif" font-weight="600">3</text>
-      <circle cx="460" cy="0" r="18" fill="#f59e0b" /><text x="454" y="6" fill="#374151" font-size="17" font-family="Arial, Helvetica, sans-serif" font-weight="600">4</text>
-      <circle cx="570" cy="0" r="18" fill="#f59e0b" /><text x="564" y="6" fill="#374151" font-size="17" font-family="Arial, Helvetica, sans-serif" font-weight="600">5</text>
+      <circle cx="130" cy="0" r="18" fill="#f59e0b" /><text x="124" y="6" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="600">1</text>
+      <circle cx="240" cy="0" r="18" fill="#f59e0b" /><text x="234" y="6" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="600">2</text>
+      <circle cx="350" cy="0" r="18" fill="#f59e0b" /><text x="344" y="6" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="600">3</text>
+      <circle cx="460" cy="0" r="18" fill="#f59e0b" /><text x="454" y="6" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="600">4</text>
+      <circle cx="570" cy="0" r="18" fill="#f59e0b" /><text x="564" y="6" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="600">5</text>
     </g>
 
     <rect x="740" y="285" width="190" height="215" rx="12" fill="#fff7ed" stroke="#d6d3d1" stroke-width="2" />
-    <text x="760" y="318" fill="#111827" font-size="18" font-family="Arial, Helvetica, sans-serif" font-weight="700">SEQUENCIA</text>
-    <text x="760" y="348" fill="#374151" font-size="17" font-family="Arial, Helvetica, sans-serif" font-weight="500">DO CENTRO PARA FORA</text>
+    <text x="760" y="318" fill="#111827" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="700">SEQUENCIA</text>
+    <text x="760" y="348" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="500">DO CENTRO PARA FORA</text>
     ${renderWrappedLines({ lines: torqueSpecs.map((item, index) => `${index + 1}ª etapa: ${item.value}`), x: 760, startY: 390, color: "#7c2d12", size: 16, weight: 700, maxChars: 20, gap: 10 })}
 
     <rect x="980" y="150" width="540" height="250" rx="18" fill="#f8fafc" stroke="#d1d5db" stroke-width="3" />
     <rect x="980" y="150" width="540" height="54" rx="18" fill="#bdebf0" />
-    <text x="1005" y="187" fill="#111827" font-size="28" font-family="Arial, Helvetica, sans-serif" font-weight="700">${escapeXml(isGearbox ? "REGULAGEM E FOLGAS" : "MONTAGEM SUPERIOR")}</text>
-    <text x="1010" y="240" fill="#111827" font-size="18" font-family="Arial, Helvetica, sans-serif" font-weight="700">PARA FUSOS / PONTO DE APERTO</text>
+    <text x="1005" y="187" fill="#111827" font-size="28" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(isGearbox ? "REGULAGEM E FOLGAS" : "MONTAGEM SUPERIOR")}</text>
+    <text x="1010" y="240" fill="#111827" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="700">PARA FUSOS / PONTO DE APERTO</text>
     <g transform="translate(1010,255)">
       ${Array.from({ length: 12 }).map((_, index) => {
         const col = index % 4;
@@ -197,15 +201,15 @@ export async function GET(request: Request) {
         const cx = 30 + col * 110 + (row % 2 ? 18 : 0);
         const cy = 26 + row * 48;
         return `<circle cx="${cx}" cy="${cy}" r="18" fill="#f4a261" stroke="#374151" stroke-width="2" />
-                <text x="${cx - 7}" y="${cy + 6}" fill="#374151" font-size="17" font-family="Arial, Helvetica, sans-serif" font-weight="600">${index + 1}</text>`;
+                <text x="${cx - 7}" y="${cy + 6}" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="600">${index + 1}</text>`;
       }).join("")}
     </g>
-    <text x="1085" y="378" fill="#374151" font-size="17" font-family="Arial, Helvetica, sans-serif" font-weight="500">PADRAO CARACOL / APERTO ESCALONADO</text>
+    <text x="1085" y="378" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="500">PADRAO CARACOL / APERTO ESCALONADO</text>
 
     <rect x="980" y="425" width="540" height="395" rx="18" fill="#f8fafc" stroke="#d1d5db" stroke-width="3" />
     <rect x="980" y="425" width="540" height="54" rx="18" fill="#bdebf0" />
-    <text x="1005" y="462" fill="#111827" font-size="28" font-family="Arial, Helvetica, sans-serif" font-weight="700">${escapeXml(isGearbox ? "SINCRONISMO E AJUSTE FINAL" : "SINCRONISMO E REGULAGEM")}</text>
-    <text x="1015" y="520" fill="#111827" font-size="18" font-family="Arial, Helvetica, sans-serif" font-weight="700">SINCRONISMO DO COMANDO</text>
+    <text x="1005" y="462" fill="#111827" font-size="28" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(isGearbox ? "SINCRONISMO E AJUSTE FINAL" : "SINCRONISMO E REGULAGEM")}</text>
+    <text x="1015" y="520" fill="#111827" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="700">SINCRONISMO DO COMANDO</text>
     <g transform="translate(1035,540)">
       <circle cx="90" cy="80" r="68" fill="#d1d5db" stroke="#374151" stroke-width="7" />
       <circle cx="270" cy="80" r="68" fill="#d1d5db" stroke="#374151" stroke-width="7" />
@@ -216,7 +220,7 @@ export async function GET(request: Request) {
 
     <rect x="1545" y="150" width="615" height="670" rx="18" fill="#f8fafc" stroke="#d1d5db" stroke-width="3" />
     <rect x="1545" y="150" width="615" height="54" rx="18" fill="#bdebf0" />
-    <text x="1570" y="187" fill="#111827" font-size="28" font-family="Arial, Helvetica, sans-serif" font-weight="700">${escapeXml(isGearbox ? "ESPECIFICACOES ADICIONAIS" : "ESPECIFICACOES DO CABECOTE")}</text>
+    <text x="1570" y="187" fill="#111827" font-size="28" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(isGearbox ? "ESPECIFICACOES ADICIONAIS" : "ESPECIFICACOES DO CABECOTE")}</text>
     <g transform="translate(1620,250)">
       <rect x="95" y="10" width="125" height="85" rx="8" fill="#b9c7cf" stroke="#374151" stroke-width="3" />
       <path d="M85 95 L230 95 L280 165 L35 165 Z" fill="#dbe4ea" stroke="#374151" stroke-width="3" />
@@ -226,30 +230,30 @@ export async function GET(request: Request) {
       <line x1="280" y1="52" x2="355" y2="52" stroke="#b45309" stroke-width="3" />
       <line x1="280" y1="165" x2="355" y2="165" stroke="#b45309" stroke-width="3" />
       <line x1="332" y1="52" x2="332" y2="165" stroke="#b45309" stroke-width="3" />
-      <text x="368" y="72" fill="#111827" font-size="18" font-family="Arial, Helvetica, sans-serif" font-weight="700">ALTURA</text>
-      <text x="368" y="96" fill="#374151" font-size="17" font-family="Arial, Helvetica, sans-serif" font-weight="500">NOMINAL</text>
-      <text x="368" y="188" fill="#374151" font-size="17" font-family="Arial, Helvetica, sans-serif" font-weight="500">PLAINICIDADE</text>
+      <text x="368" y="72" fill="#111827" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="700">ALTURA</text>
+      <text x="368" y="96" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="500">NOMINAL</text>
+      <text x="368" y="188" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="500">PLAINICIDADE</text>
     </g>
     ${renderWrappedLines({ lines: measureLines, x: 1575, startY: 610, color: "#7c2d12", size: 16, weight: 700, maxChars: 30, gap: 10 })}
 
     <rect x="40" y="655" width="920" height="305" rx="18" fill="#f8fafc" stroke="#d1d5db" stroke-width="3" />
     <rect x="40" y="655" width="920" height="54" rx="18" fill="#bdebf0" />
-    <text x="65" y="692" fill="#111827" font-size="28" font-family="Arial, Helvetica, sans-serif" font-weight="700">${escapeXml(isGearbox ? "FIXACAO E FECHAMENTO" : "BIELAS E TORQUES")}</text>
+    <text x="65" y="692" fill="#111827" font-size="28" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(isGearbox ? "FIXACAO E FECHAMENTO" : "BIELAS E TORQUES")}</text>
     <g transform="translate(70,735)">
       <circle cx="85" cy="145" r="48" fill="none" stroke="#374151" stroke-width="12" />
       <rect x="118" y="30" width="82" height="165" rx="18" transform="rotate(25 159 110)" fill="#d8dee6" stroke="#374151" stroke-width="4" />
       <circle cx="216" cy="45" r="28" fill="none" stroke="#374151" stroke-width="10" />
-      <text x="270" y="55" fill="#111827" font-size="18" font-family="Arial, Helvetica, sans-serif" font-weight="700">APERTO EM ESTAGIOS</text>
+      <text x="270" y="55" fill="#111827" font-size="18" font-family="DejaVu Sans, sans-serif" font-weight="700">APERTO EM ESTAGIOS</text>
       ${renderWrappedLines({ lines: torqueSpecs.map((item) => `${item.component}: ${item.value}`), x: 270, startY: 95, color: "#1f2937", size: 18, weight: 700, maxChars: 38, gap: 8 })}
     </g>
 
     <rect x="1545" y="845" width="615" height="115" rx="18" fill="#f8fafc" stroke="#d1d5db" stroke-width="3" />
     <rect x="1545" y="845" width="615" height="46" rx="18" fill="#bdebf0" />
-    <text x="1570" y="877" fill="#111827" font-size="28" font-family="Arial, Helvetica, sans-serif" font-weight="700">${escapeXml(isGearbox ? "VERIFICACAO FINAL" : "REGULAGEM FINAL")}</text>
+    <text x="1570" y="877" fill="#111827" font-size="28" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(isGearbox ? "VERIFICACAO FINAL" : "REGULAGEM FINAL")}</text>
     ${renderWrappedLines({ lines: noteLines, x: 1575, startY: 920, color: "#1f2937", size: 15, weight: 700, maxChars: 36, gap: 7 })}
 
     <rect x="40" y="988" width="2120" height="360" rx="18" fill="#0b2d3b" />
-    <text x="70" y="1038" fill="#f8fafc" font-size="30" font-family="Arial, Helvetica, sans-serif" font-weight="700">RESUMO DA IA E REFERENCIAS TECNICAS</text>
+    <text x="70" y="1038" fill="#f8fafc" font-size="30" font-family="DejaVu Sans, sans-serif" font-weight="700">RESUMO DA IA E REFERENCIAS TECNICAS</text>
     ${renderWrappedLines({ lines: [
       `Família: ${matched?.family || (isGearbox ? "transmissão pesada" : "diesel pesado")}`,
       `Aplicação: ${matched?.application || primaryKnowledge?.summary || "consulta técnica assistida"}`,
@@ -259,7 +263,7 @@ export async function GET(request: Request) {
     ], x: 80, startY: 1085, color: "#dbeafe", size: 20, weight: 700, maxChars: 100, gap: 12 })}
 
     <rect x="40" y="1370" width="2120" height="70" rx="14" fill="#facc15" opacity="0.22" />
-    <text x="70" y="1415" fill="#111827" font-size="24" font-family="Arial, Helvetica, sans-serif" font-weight="700">DICA: USE OLEO LIMPO NAS ROSCAS, CONFIRA REFERENCIAS DE PMS E SUBSTITUA FIXADORES COM APERTO ANGULAR SEMPRE QUE NECESSARIO.</text>
+    <text x="70" y="1415" fill="#111827" font-size="24" font-family="DejaVu Sans, sans-serif" font-weight="700">DICA: USE OLEO LIMPO NAS ROSCAS, CONFIRA REFERENCIAS DE PMS E SUBSTITUA FIXADORES COM APERTO ANGULAR SEMPRE QUE NECESSARIO.</text>
   </svg>`;
 
   const imageBuffer = await sharp(Buffer.from(svg, "utf8"))
