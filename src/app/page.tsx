@@ -99,6 +99,7 @@ export default function Home() {
   const [aiLoading, setAiLoading] = useState(false);
   const [showAiPreview, setShowAiPreview] = useState(false);
   const [error, setError] = useState("");
+  const isAppMode = typeof window !== "undefined" && (window.location.protocol === "capacitor:" || /android|wv/i.test(navigator.userAgent));
 
   useEffect(() => {
     void handleSearch(undefined, initialFilters);
@@ -183,6 +184,42 @@ export default function Home() {
     }
   }
 
+  function openInApp(url?: string | null) {
+    if (!url || typeof window === "undefined") {
+      return;
+    }
+
+    window.location.assign(url);
+  }
+
+  function openSchemaDownload() {
+    if (!result?.schemaImageUrl) {
+      return;
+    }
+
+    const finalUrl = `${result.schemaImageUrl}&download=1`;
+
+    if (isAppMode) {
+      openInApp(finalUrl);
+      return;
+    }
+
+    window.open(finalUrl, "_blank", "noopener,noreferrer");
+  }
+
+  function openExternalReference(url?: string | null) {
+    if (!url) {
+      return;
+    }
+
+    if (isAppMode) {
+      openInApp(url);
+      return;
+    }
+
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
   const mainResult = result?.results?.[0];
 
   return (
@@ -254,22 +291,21 @@ export default function Home() {
               >
                 {aiLoading ? "Gemini gerando..." : "Gerar com Gemini"}
               </button>
-              <a
-                href={result?.schemaImageUrl ? `${result.schemaImageUrl}&download=1` : "#"}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                type="button"
+                onClick={openSchemaDownload}
                 className="rounded-2xl border border-slate-700 px-5 py-3 font-semibold text-slate-100 hover:border-cyan-400"
               >
-                Baixar JPG
-              </a>
-              <a
-                href="/downloads/MT-DIESEL-ESQUEMAS.apk"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl border border-emerald-500/50 bg-emerald-500/10 px-5 py-3 font-semibold text-emerald-200 hover:border-emerald-400"
-              >
-                Baixar APK Android
-              </a>
+                {isAppMode ? "Abrir JPG no app" : "Baixar JPG"}
+              </button>
+              {!isAppMode ? (
+                <a
+                  href="/downloads/MT-DIESEL-ESQUEMAS.apk"
+                  className="rounded-2xl border border-emerald-500/50 bg-emerald-500/10 px-5 py-3 font-semibold text-emerald-200 hover:border-emerald-400"
+                >
+                  Baixar APK Android
+                </a>
+              ) : null}
             </div>
 
             {error ? (
@@ -342,14 +378,13 @@ export default function Home() {
                       >
                         Confirmar visualização
                       </button>
-                      <a
-                        href={result?.schemaImageUrl ? `${result.schemaImageUrl}&download=1` : "#"}
-                        target="_blank"
-                        rel="noreferrer"
+                      <button
+                        type="button"
+                        onClick={openSchemaDownload}
                         className="rounded-xl bg-violet-500 px-3 py-2 text-sm font-semibold text-white"
                       >
-                        Aprovar e baixar JPG
-                      </a>
+                        {isAppMode ? "Abrir JPG no app" : "Aprovar e baixar JPG"}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -393,14 +428,13 @@ export default function Home() {
                   <h3 className="text-xl font-bold">Observações técnicas</h3>
                   <p className="mt-3 text-sm text-slate-300">{result.publicData.wiki.extract}</p>
                   {result.publicData.wiki.url ? (
-                    <a
-                      href={result.publicData.wiki.url}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => openExternalReference(result.publicData.wiki?.url)}
                       className="mt-3 inline-flex text-sm font-semibold text-cyan-300 hover:text-cyan-200"
                     >
-                      Abrir fonte pública
-                    </a>
+                      {isAppMode ? "Abrir fonte no app" : "Abrir fonte pública"}
+                    </button>
                   ) : null}
                 </div>
               ) : null}
