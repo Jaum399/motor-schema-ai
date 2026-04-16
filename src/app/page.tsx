@@ -189,20 +189,20 @@ export default function Home() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl space-y-3">
               <span className="inline-flex rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200">
-                Motor Schema AI
+                MT DIESEL ESQUEMAS
               </span>
               <h1 className="text-3xl font-black tracking-tight text-white sm:text-5xl">
-                Busque esquemas por marca e motor
+                Esquemas detalhados estilo manual de oficina
               </h1>
               <p className="max-w-2xl text-sm text-slate-300 sm:text-base">
-                Informe apenas a marca e o código do motor. O sistema cruza referências técnicas, histórico mecânico
-                enviado no chat e gera uma imagem JPG detalhada com etapas, torques e pontos críticos de montagem.
+                Informe a marca e o motor para gerar um esquema técnico detalhado, focado apenas na ilustração mecânica,
+                com visual explicativo semelhante aos modelos enviados.
               </p>
             </div>
             <div className="grid gap-3 text-sm text-slate-200 sm:grid-cols-3">
-              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">🔎 Busca simplificada por marca e motor</div>
-              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">🖼️ Imagem JPG técnica detalhada</div>
-              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">☁️ Catálogo pronto para produção</div>
+              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">🔎 Busca objetiva por marca e motor</div>
+              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">🛠️ Esquema mecânico detalhado</div>
+              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">📲 Pronto para uso no celular</div>
             </div>
           </div>
         </section>
@@ -259,6 +259,14 @@ export default function Home() {
               >
                 Baixar JPG
               </a>
+              <a
+                href="/downloads/MT-DIESEL-ESQUEMAS.apk"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-2xl border border-emerald-500/50 bg-emerald-500/10 px-5 py-3 font-semibold text-emerald-200 hover:border-emerald-400"
+              >
+                Baixar APK Android
+              </a>
             </div>
 
             {error ? (
@@ -287,8 +295,8 @@ export default function Home() {
             <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-2xl font-bold">Foto de referência + esquema técnico</h2>
-                  <p className="text-sm text-slate-400">Fontes visuais em alta qualidade para comparar com o manual gerado.</p>
+                  <h2 className="text-2xl font-bold">Esquema técnico detalhado</h2>
+                  <p className="text-sm text-slate-400">Visual mecânico focado somente no esquema gerado em padrão de manual.</p>
                   {result?.aiProvider ? (
                     <span className="mt-2 inline-flex rounded-full bg-violet-500/15 px-3 py-1 text-xs font-semibold text-violet-200">
                       IA ativa: {result.aiProvider === "gemini" ? "Gemini" : "Assistente local"}
@@ -305,29 +313,6 @@ export default function Home() {
                   </button>
                 ) : null}
               </div>
-
-              {result.publicData.photoGallery?.[0] ? (
-                <div className="mb-4 overflow-hidden rounded-2xl border border-slate-700 bg-slate-950">
-                  <img
-                    src={result.publicData.photoGallery[0].src}
-                    alt={result.publicData.photoGallery[0].title}
-                    className="h-72 w-full object-cover"
-                  />
-                  <div className="flex items-center justify-between gap-3 px-4 py-3 text-sm text-slate-300">
-                    <span>Referência visual: {result.publicData.photoGallery[0].source}</span>
-                    {result.publicData.photoGallery[0].sourceUrl ? (
-                      <a
-                        href={result.publicData.photoGallery[0].sourceUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-semibold text-cyan-300 hover:text-cyan-200"
-                      >
-                        Abrir fonte
-                      </a>
-                    ) : null}
-                  </div>
-                </div>
-              ) : null}
 
               <img
                 src={result.schemaImageUrl}
@@ -400,36 +385,9 @@ export default function Home() {
                 )}
               </div>
 
-              {result.publicData.photoGallery?.length ? (
-                <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-                  <h3 className="text-xl font-bold">Fotos de referência</h3>
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    {result.publicData.photoGallery.slice(0, 4).map((image) => (
-                      <a
-                        key={`${image.src}-${image.source}`}
-                        href={image.sourceUrl || image.src}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="overflow-hidden rounded-2xl border border-slate-700 bg-slate-950"
-                      >
-                        <img src={image.src} alt={image.title} className="h-36 w-full object-cover" />
-                        <div className="px-3 py-2 text-xs text-slate-300">{image.source}</div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-
               {result.publicData.wiki ? (
                 <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-                  <h3 className="text-xl font-bold">Contexto técnico extra</h3>
-                  {result.publicData.wiki.image ? (
-                    <img
-                      src={result.publicData.wiki.image}
-                      alt={result.publicData.wiki.title}
-                      className="mt-3 h-40 w-full rounded-2xl object-cover"
-                    />
-                  ) : null}
+                  <h3 className="text-xl font-bold">Observações técnicas</h3>
                   <p className="mt-3 text-sm text-slate-300">{result.publicData.wiki.extract}</p>
                   {result.publicData.wiki.url ? (
                     <a
@@ -460,7 +418,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-slate-800 bg-slate-950 px-4 py-6 text-center text-sm text-slate-400 sm:px-6 lg:px-8">
-        <p className="font-semibold text-slate-200">MT Diesel</p>
+        <p className="font-semibold text-slate-200">MT DIESEL ESQUEMAS</p>
         <p>© 2026 MT DIESEL PARANATINGA</p>
         <p>CNPJ 30.399.905/0001-47</p>
       </footer>

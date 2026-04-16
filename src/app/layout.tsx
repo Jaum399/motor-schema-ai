@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Motor Schema AI",
-  description: "Busca de esquemas de montagem de motor com APIs públicas, geração visual e MongoDB.",
+  title: "MT DIESEL ESQUEMAS",
+  description: "Esquemas técnicos detalhados de motores diesel com geração visual em padrão de manual.",
 };
 
 export default function RootLayout({
