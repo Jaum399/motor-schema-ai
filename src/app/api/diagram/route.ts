@@ -13,9 +13,9 @@ function getEmbeddedFontCss() {
   }
 
   embeddedFontCss = `
-    text, tspan {
-      font-family: Arial, Helvetica, sans-serif;
-      font-style: normal;
+    svg, text, tspan {
+      font-family: Arial, Helvetica, Liberation Sans, sans-serif !important;
+      font-style: normal !important;
     }
   `;
 
