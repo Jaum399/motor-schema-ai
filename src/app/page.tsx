@@ -65,8 +65,10 @@ type SearchForm = {
 
 const presets: SearchForm[] = [
   { label: "Iveco F3B 380", brand: "Iveco", engine: "F3B 380", model: "Cursor 13" },
-  { label: "Cummins X15", brand: "Cummins", engine: "X15", model: "ISX 450" },
-  { label: "Volvo D13K", brand: "Volvo", engine: "D13K", model: "D13" },
+  { label: "Scania DC12 420", brand: "Scania", engine: "DC12 420", model: "124 420" },
+  { label: "MWM X10", brand: "MWM", engine: "X10 6 cilindros", model: "X10" },
+  { label: "Cummins 6TAA", brand: "Cummins", engine: "6TAA 6.304", model: "6TAA 6.304" },
+  { label: "Mercedes G211", brand: "Mercedes-Benz", engine: "G211-16 Câmbio", model: "G211-16" },
 ];
 
 const initialFilters: SearchForm = presets[0];
@@ -189,8 +191,8 @@ export default function Home() {
                 Busque esquemas por marca e motor
               </h1>
               <p className="max-w-2xl text-sm text-slate-300 sm:text-base">
-                Informe apenas a marca e o código do motor. O sistema cruza referências técnicas e gera uma
-                imagem JPG detalhada com etapas, torques e pontos críticos de montagem.
+                Informe apenas a marca e o código do motor. O sistema cruza referências técnicas, histórico mecânico
+                enviado no chat e gera uma imagem JPG detalhada com etapas, torques e pontos críticos de montagem.
               </p>
             </div>
             <div className="grid gap-3 text-sm text-slate-200 sm:grid-cols-3">
@@ -280,6 +282,7 @@ export default function Home() {
             <ul className="mt-4 space-y-3 text-sm text-slate-300">
               <li>✅ Busca apenas por marca e motor</li>
               <li>✅ Geração de imagem JPG com muito mais detalhe</li>
+              <li>✅ IA contextual treinada com histórico técnico do chat</li>
               <li>✅ Painel técnico com torques e checklist</li>
               <li>✅ Histórico de pesquisas</li>
               <li>✅ Favoritos no navegador</li>

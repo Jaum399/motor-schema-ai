@@ -134,6 +134,143 @@ export const engineCatalog: EngineRecord[] = [
     ],
     tags: ["volvo", "d13", "fh", "fm", "diesel"],
   },
+  {
+    id: "scania-dc12-420",
+    brand: "Scania",
+    model: "124 420",
+    engineCode: "DC12 420",
+    family: "Diesel pesado",
+    years: "1998-2006",
+    application: "Linha rodoviária Scania série 4",
+    summary:
+      "Motor focado em aperto de biela, altura de camisa, cabeçote e unidades PDE.",
+    torqueSpecs: [
+      { component: "Bielas", sequence: "3 etapas", value: "20 Nm > 60 Nm > 90°" },
+      { component: "Mancais", sequence: "Progressivo", value: "50 Nm > 150 Nm > 90°" },
+      { component: "Cabeçote", sequence: "Caracol", value: "60 Nm > 150 Nm > 250 Nm > 90°" },
+      { component: "PDE", sequence: "Ajuste final", value: "20 Nm > 75°" },
+    ],
+    notes: [
+      "Projetar camisa entre 0,20 e 0,30 mm acima do bloco.",
+      "Diferença máxima entre camisas: 0,02 mm.",
+      "Lubrificar roscas com óleo de motor antes do aperto.",
+    ],
+    checklist: [
+      "Conferir lado correto da biela e da capa",
+      "Medir altura das camisas com relógio comparador",
+      "Aplicar sequência do cabeçote em caracol",
+      "Regular PDE e verificar sincronismo",
+    ],
+    tags: ["scania", "dc12", "420", "124", "pde"],
+  },
+  {
+    id: "mwm-x10-6c",
+    brand: "MWM",
+    model: "X10",
+    engineCode: "X10 6 cilindros",
+    family: "Diesel médio/pesado",
+    years: "2012-2025",
+    application: "Caminhões, ônibus e aplicações industriais",
+    summary:
+      "Base técnica de válvulas do MWM X10 com regulagem por método de balanço.",
+    torqueSpecs: [
+      { component: "Válvulas admissão", sequence: "Motor frio", value: "0,40 mm" },
+      { component: "Válvulas escape", sequence: "Motor frio", value: "0,40 mm" },
+      { component: "Ordem de ignição", sequence: "Regulagem", value: "1 - 5 - 3 - 6 - 2 - 4" },
+    ],
+    notes: [
+      "Regular pelo método de balanço, cilindro em cruzamento regula o correspondente.",
+      "Marcar os balancins já ajustados para evitar erro.",
+    ],
+    checklist: [
+      "Colocar 6º em balanço e regular 1º",
+      "Seguir a tabela 2-5 / 4-3 / 1-6 / 5-2 / 3-4",
+      "Conferir folga com leve resistência na lâmina",
+    ],
+    tags: ["mwm", "x10", "6 cilindros", "valvula"],
+  },
+  {
+    id: "cummins-6taa-6304",
+    brand: "Cummins",
+    model: "6TAA 6.304",
+    engineCode: "6TAA 6.304",
+    family: "Diesel série B",
+    years: "1998-2015",
+    application: "Caminhões e máquinas",
+    summary:
+      "Motor Cummins com forte foco em sequência do cabeçote, projeção do pistão e saliência da camisa.",
+    torqueSpecs: [
+      { component: "Cabeçote", sequence: "Caracol 1 a 26", value: "70 Nm > 105 Nm > 90°" },
+      { component: "Bielas", sequence: "3 etapas", value: "35 Nm > 70 Nm > 60°" },
+      { component: "Mancais", sequence: "3 etapas", value: "60 Nm > 115 Nm > 90°" },
+      { component: "Volante", sequence: "Direto", value: "137 Nm" },
+    ],
+    notes: [
+      "Projeção do pistão entre 0,40 e 0,65 mm.",
+      "Saliência da camisa entre 0,03 e 0,12 mm.",
+      "Folga a frio: adm 0,25 mm / esc 0,50 mm.",
+    ],
+    checklist: [
+      "Apertar cabeçote do centro para fora",
+      "Marcar ângulo final de todos os parafusos",
+      "Medir pistão e camisa com relógio comparador",
+      "Regular válvulas em duas etapas, PMS 1 e PMS 6",
+    ],
+    tags: ["cummins", "6taa", "6304", "serie b"],
+  },
+  {
+    id: "mercedes-om352",
+    brand: "Mercedes-Benz",
+    model: "OM352",
+    engineCode: "OM352",
+    family: "Diesel clássico",
+    years: "1960-1990",
+    application: "1113 e linha Mercedes clássica",
+    summary:
+      "Motor robusto com foco em seta dos pistões, ponto da distribuição e fechamento profissional do cabeçote.",
+    torqueSpecs: [
+      { component: "Cabeçote", sequence: "Centro para extremidades", value: "Consultar revisão do OM352" },
+      { component: "Distribuição", sequence: "Marcas alinhadas", value: "Sincronismo obrigatório" },
+    ],
+    notes: [
+      "Seta do pistão apontada para a frente do motor.",
+      "Limpar galerias e bomba de óleo antes de fechar o cárter.",
+    ],
+    checklist: [
+      "Alinhar marcas das engrenagens",
+      "Conferir vedação da lubrificação",
+      "Aplicar torque do cabeçote em cruz",
+    ],
+    tags: ["mercedes", "om352", "1113", "352"],
+  },
+  {
+    id: "mercedes-g211-16",
+    brand: "Mercedes-Benz",
+    model: "G211-16",
+    engineCode: "Câmbio 16 marchas",
+    family: "Transmissão pesada",
+    years: "2000-2025",
+    application: "Câmbio Mercedes de 16 marchas com splitter e range",
+    summary:
+      "Transmissão com foco em calços, folga axial, sincronizadores e códigos de peças principais.",
+    torqueSpecs: [
+      { component: "Carcaça central M12", sequence: "Fechamento", value: "80 a 95 Nm" },
+      { component: "Tampa traseira GP", sequence: "Final", value: "50 Nm + 45°" },
+      { component: "Tulipa de saída", sequence: "Final", value: "600 Nm com trava química" },
+    ],
+    notes: [
+      "Folga axial K2 entre 0,02 e 0,08 mm.",
+      "Pré-carga de rolamentos novos entre 0,00 e 0,15 mm.",
+      "Sincronizador deve manter folga superior a 0,3 mm.",
+    ],
+    checklist: [
+      "Montar eixo piloto, splitter e eixo secundário em sequência",
+      "Medir calços com relógio comparador",
+      "Lubrificar roletes e conjunto planetário",
+      "Confirmar posição dos sincronizadores e luvas",
+    ],
+    tags: ["g211", "g211-16", "cambio", "mercedes", "16 marchas"],
+  },
 ];
 
 function normalizeValue(value?: string) {

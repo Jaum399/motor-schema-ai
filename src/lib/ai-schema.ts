@@ -1,4 +1,5 @@
 import type { EngineRecord } from "@/data/engines";
+import { findKnowledgeEntries } from "@/data/knowledge-base";
 
 export type AiBlueprint = {
   provider: "gemini" | "fallback";
@@ -29,23 +30,27 @@ export function buildFallbackBlueprint({
   engine?: string;
 }): AiBlueprint {
   const engineName = `${record?.brand || brand || "Motor"} ${record?.model || engine || "diesel"}`.trim();
+  const knowledge = findKnowledgeEntries(brand || record?.brand, engine || record?.engineCode);
+  const primaryKnowledge = knowledge[0];
 
   return {
     provider: "fallback",
-    headline: `Esquema inteligente de ${engineName}`,
-    narrative: `A IA montou um esquema técnico com foco em torques, sincronismo, cabeçote e fechamento final do ${engineName}.`,
-    warnings: [
+    headline: primaryKnowledge?.title || `Esquema inteligente de ${engineName}`,
+    narrative:
+      primaryKnowledge?.summary ||
+      `A IA montou um esquema técnico com foco em torques, sincronismo, cabeçote e fechamento final do ${engineName}.`,
+    warnings: primaryKnowledge?.mountingTips?.slice(0, 3) || [
       "Lubrificar roscas críticas antes do aperto angular.",
       "Conferir planicidade do cabeçote e espessura da junta.",
       "Executar sincronismo com o primeiro cilindro em PMS.",
     ],
-    detailLines: [
+    detailLines: primaryKnowledge?.measurements?.slice(0, 4) || [
       `Aplicação: ${record?.application || "linha diesel pesada"}`,
       `Família: ${record?.family || "diesel"}`,
       `Faixa de anos: ${record?.years || "referência técnica"}`,
       `Motor/código: ${record?.engineCode || engine || "consulta genérica"}`,
     ],
-    recommendedSequence: record?.checklist?.slice(0, 4) || [
+    recommendedSequence: record?.checklist?.slice(0, 4) || primaryKnowledge?.torqueHighlights?.slice(0, 4) || [
       "Fechar bloco e mancais em sequência do centro para fora",
       "Aplicar cabeçote com aperto escalonado",
       "Sincronizar comando, virabrequim e injeção",
@@ -65,15 +70,23 @@ export async function generateAiBlueprint({
 }): Promise<AiBlueprint> {
   const fallback = buildFallbackBlueprint({ record, brand, engine });
   const apiKey = process.env.GEMINI_API_KEY;
+  const knowledge = findKnowledgeEntries(brand || record?.brand, engine || record?.engineCode);
+  const knowledgeContext = knowledge
+    .map(
+      (item) =>
+        `Título: ${item.title}\nResumo: ${item.summary}\nTorques: ${item.torqueHighlights.join(" | ")}\nMedidas: ${item.measurements.join(" | ")}\nVálvulas: ${item.valveSpecs.join(" | ")}\nDicas: ${item.mountingTips.join(" | ")}`
+    )
+    .join("\n\n");
 
   if (!apiKey) {
     return fallback;
   }
 
-  const prompt = `Gere um JSON técnico em português para um esquema visual de montagem de motor diesel.
+  const prompt = `Gere um JSON técnico em português Brasil para um esquema visual mecânico detalhado.
 Marca: ${brand || record?.brand || "não informado"}
 Motor: ${engine || record?.engineCode || record?.model || "não informado"}
-Contexto: criar um infográfico técnico semelhante a manual de torque e montagem.
+Base treinada com histórico técnico do chat:\n${knowledgeContext || "Sem histórico adicional"}
+Objetivo: criar um infográfico técnico semelhante a manual de torque e montagem.
 Retorne estritamente JSON com as chaves: headline, narrative, warnings, detailLines, recommendedSequence.
 Cada array deve ter exatamente 4 itens curtos e objetivos.`;
 

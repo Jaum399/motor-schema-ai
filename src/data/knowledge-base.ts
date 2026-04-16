@@ -1,0 +1,251 @@
+export type KnowledgeEntry = {
+  id: string;
+  brand: string;
+  engine: string;
+  title: string;
+  category: "engine" | "gearbox";
+  aliases: string[];
+  summary: string;
+  torqueHighlights: string[];
+  measurements: string[];
+  valveSpecs: string[];
+  mountingTips: string[];
+  partCodes: string[];
+};
+
+export const knowledgeBase: KnowledgeEntry[] = [
+  {
+    id: "scania-dc12-420",
+    brand: "Scania",
+    engine: "DC12 420",
+    title: "Scania 124 420 - biela, camisas e cabeçote",
+    category: "engine",
+    aliases: ["scania 420", "dc12", "124 420", "scania 124"],
+    summary: "Motor de linha pesada com foco em biela, alturas de camisa, cabeçote e unidades injetoras.",
+    torqueHighlights: [
+      "Bielas: 20 Nm + 60 Nm + 90°",
+      "Mancais principais: 50 Nm + 150 Nm + 90°",
+      "Cabeçote: 60 Nm + 150 Nm + 250 Nm + 90°",
+      "Volante: 130 Nm + 90°",
+    ],
+    measurements: [
+      "Projeção da camisa: 0,20 mm a 0,30 mm",
+      "Diferença máxima na mesma camisa: 0,02 mm",
+      "Diferença máxima entre camisas adjacentes: 0,02 mm",
+      "Válvulas a frio: admissão 0,40 mm / escape 0,40 mm",
+    ],
+    valveSpecs: [
+      "Ordem de ignição: 1 - 5 - 3 - 6 - 2 - 4",
+      "Usar método de balanço para regulagem",
+      "Regular com motor frio e lâmina justa",
+    ],
+    mountingTips: [
+      "Lubrificar roscas e face de apoio do parafuso com óleo de motor",
+      "Garantir números da biela e da capa voltados para o mesmo lado",
+      "Limpar alojamento das camisas para não alterar a altura",
+    ],
+    partCodes: [],
+  },
+  {
+    id: "mwm-x10-6c",
+    brand: "MWM",
+    engine: "X10 6 cilindros",
+    title: "MWM X10 6 cilindros - regulagem de válvulas",
+    category: "engine",
+    aliases: ["mwm x10", "x10 6 cilindros", "x10"],
+    summary: "Conjunto com regulagem por balanço e folga de válvulas uniforme para admissão e escape.",
+    torqueHighlights: [
+      "Consultar revisão específica para biela e cabeçote por aplicação",
+      "Foco principal do histórico: regulagem de válvulas",
+    ],
+    measurements: [
+      "Folga a frio: admissão 0,40 mm",
+      "Folga a frio: escape 0,40 mm",
+    ],
+    valveSpecs: [
+      "Ordem de ignição: 1 - 5 - 3 - 6 - 2 - 4",
+      "6 em balanço regula 1",
+      "2 em balanço regula 5; 4 regula 3; 1 regula 6; 5 regula 2; 3 regula 4",
+    ],
+    mountingTips: [
+      "Marcar balancins já regulados para evitar erro",
+      "Inspecionar desgaste e borra com a tampa aberta",
+      "A lâmina deve passar com leve resistência",
+    ],
+    partCodes: [],
+  },
+  {
+    id: "scania-v8",
+    brand: "Scania",
+    engine: "V8",
+    title: "Scania V8 - histórico técnico de montagem",
+    category: "engine",
+    aliases: ["scania v8", "v8 scania"],
+    summary: "Base técnica preparada para esquemas de motores V8 da linha Scania com foco em fechamento e sincronismo.",
+    torqueHighlights: [
+      "Consultar série específica do V8 para confirmar torque final",
+      "Aplicar sequência cruzada e controle angular em cabeçote e mancais",
+    ],
+    measurements: [
+      "Validar projeção de pistão e altura do cabeçote conforme versão",
+    ],
+    valveSpecs: [
+      "Regular válvulas conforme série DSC/DC16 da aplicação",
+    ],
+    mountingTips: [
+      "Identificar corretamente os bancos do V",
+      "Executar sincronismo com ferramentas de trava",
+    ],
+    partCodes: [],
+  },
+  {
+    id: "cummins-serie-x",
+    brand: "Cummins",
+    engine: "Série X",
+    title: "Cummins Série X - linha pesada",
+    category: "engine",
+    aliases: ["cummins serie x", "cummins x", "x15", "isx"],
+    summary: "Família de motores pesados com aperto multiestágio e grande atenção aos sistemas de válvulas e injeção.",
+    torqueHighlights: [
+      "Cabeçote e mancais devem seguir boletim técnico por série",
+      "Aperto angular e reaperto controlado são críticos",
+    ],
+    measurements: [
+      "Folgas e projeções dependem do submodelo X15/ISX",
+    ],
+    valveSpecs: [
+      "Regular conforme ordem de ignição e revisão do comando",
+    ],
+    mountingTips: [
+      "Conferir EGR, lubrificação e assentamento das camisas",
+    ],
+    partCodes: [],
+  },
+  {
+    id: "cummins-6taa-6304",
+    brand: "Cummins",
+    engine: "6TAA 6.304",
+    title: "Cummins 6TAA 6.304 - cabeça, biela, camisa e válvulas",
+    category: "engine",
+    aliases: ["6taa6304", "6taa 6.304", "cummins 6304", "série b"],
+    summary: "Motor seis cilindros em linha com sequência de cabeçote em caracol e regulagem de válvulas em duas etapas.",
+    torqueHighlights: [
+      "Cabeçote: 70 Nm + 105 Nm + 90°",
+      "Bielas: 35 Nm + 70 Nm + 60°",
+      "Mancais principais: 60 Nm + 115 Nm + 90°",
+      "Volante: 137 Nm",
+    ],
+    measurements: [
+      "Projeção do pistão: 0,40 mm a 0,65 mm",
+      "Limite máximo do pistão: 0,66 mm",
+      "Saliência da camisa: 0,03 mm a 0,12 mm",
+      "Diferença entre camisas adjacentes: máximo 0,05 mm",
+    ],
+    valveSpecs: [
+      "Folga a frio: admissão 0,25 mm / escape 0,50 mm",
+      "PMS 1 regula: 1 adm/esc, 2 adm, 3 esc, 4 adm, 5 esc",
+      "PMS 6 regula: 2 esc, 3 adm, 4 esc, 5 adm, 6 adm/esc",
+    ],
+    mountingTips: [
+      "Limpar furos do bloco e instalar junta com TOP para cima",
+      "Usar relógio comparador na medição de pistão e camisa",
+      "Marcar a cabeça dos parafusos no aperto angular final",
+    ],
+    partCodes: [],
+  },
+  {
+    id: "mercedes-om352",
+    brand: "Mercedes-Benz",
+    engine: "OM352",
+    title: "Mercedes OM352 - diagrama e montagem geral",
+    category: "engine",
+    aliases: ["om352", "mercedes 352", "1113"],
+    summary: "Clássico motor Mercedes com atenção à seta dos pistões, ponto da distribuição e vedação das galerias de óleo.",
+    torqueHighlights: [
+      "Cabeçote deve ser apertado do centro para as extremidades",
+      "Consultar valor exato do modelo para fechamento final",
+    ],
+    measurements: [
+      "Conferir folga de válvulas conforme versão aspirada ou turbo",
+    ],
+    valveSpecs: [
+      "Sincronismo pelas marcas das engrenagens da distribuição",
+    ],
+    mountingTips: [
+      "Setas dos pistões voltadas para a frente do motor",
+      "Verificar vedação da bomba de óleo e limpeza das galerias",
+      "Executar regulagem após o fechamento completo",
+    ],
+    partCodes: [],
+  },
+  {
+    id: "mercedes-g211-16",
+    brand: "Mercedes-Benz",
+    engine: "G211-16 Câmbio",
+    title: "Câmbio Mercedes G211-16 - montagem, calços e códigos",
+    category: "gearbox",
+    aliases: ["g211", "g211-16", "cambio mercedes 16 marchas", "mercedes g211 16"],
+    summary: "Transmissão de 16 marchas com splitter e range, exigindo medição de folgas, calços e sincronizadores.",
+    torqueHighlights: [
+      "Carcaça central M12: 80 a 95 Nm",
+      "Tampa traseira GP: 50 Nm + 45°",
+      "Bujão dreno/enchimento: 60 Nm",
+      "Porca da tulipa: 600 Nm com trava química",
+    ],
+    measurements: [
+      "Folga axial constante K2: 0,02 mm a 0,08 mm",
+      "Pré-carga de rolamentos novos: 0,00 mm a 0,15 mm",
+      "Interlock total: 0,20 mm a 0,40 mm",
+      "Folga mínima do sincronizador: superior a 0,3 mm",
+    ],
+    valveSpecs: [],
+    mountingTips: [
+      "Lubrificar rolamentos de agulha e planetárias na montagem",
+      "A luva do splitter tem lado e deve respeitar a ranhura interna",
+      "Ao trocar rolamento cônico, medir novamente a constante K",
+    ],
+    partCodes: [
+      "Eixo piloto: A9302620403",
+      "Anel sincronizador GV: A9472601945",
+      "Luva de engate splitter: A9452626523",
+      "Eixo secundário: A9302620805",
+      "Retentor de saída: A0209971347",
+    ],
+  },
+];
+
+function normalize(value?: string) {
+  return (value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+export function findKnowledgeEntries(brand?: string, engine?: string) {
+  const tokens = [brand, engine]
+    .map(normalize)
+    .flatMap((item) => item.split(/\s+/).filter(Boolean));
+
+  if (!tokens.length) {
+    return knowledgeBase.slice(0, 4);
+  }
+
+  return knowledgeBase
+    .map((entry) => {
+      const haystack = normalize([
+        entry.brand,
+        entry.engine,
+        entry.title,
+        entry.summary,
+        ...entry.aliases,
+      ].join(" "));
+
+      const score = tokens.reduce((acc, token) => acc + (haystack.includes(token) ? 3 : 0), 0);
+      return { entry, score };
+    })
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((item) => item.entry)
+    .slice(0, 3);
+}
