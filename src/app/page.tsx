@@ -22,14 +22,6 @@ type ResultItem = {
   checklist: string[];
 };
 
-type HistoryItem = {
-  _id?: string;
-  brand?: string;
-  model?: string;
-  engine?: string;
-  createdAt?: string;
-};
-
 type SearchResponse = {
   aiSummary: string;
   aiProvider?: string;
@@ -48,6 +40,12 @@ type SearchResponse = {
     sourceList?: string[];
     duckAnswer?: string | null;
     modelHints?: string[];
+    photoGallery?: {
+      src: string;
+      title: string;
+      source: string;
+      sourceUrl?: string | null;
+    }[];
     wiki?: {
       title: string;
       extract: string;
@@ -92,7 +90,6 @@ async function parseJsonSafe(response: Response) {
 export default function Home() {
   const [filters, setFilters] = useState<SearchForm>(initialFilters);
   const [result, setResult] = useState<SearchResponse | null>(null);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -100,7 +97,6 @@ export default function Home() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    void loadHistory();
     void handleSearch(undefined, initialFilters);
 
     if (typeof window !== "undefined") {
@@ -110,16 +106,6 @@ export default function Home() {
       }
     }
   }, []);
-
-  async function loadHistory() {
-    try {
-      const response = await fetch("/api/history", { cache: "no-store" });
-      const data = await parseJsonSafe(response);
-      setHistory(data.items || []);
-    } catch {
-      setHistory([]);
-    }
-  }
 
   async function handleSearch(event?: FormEvent<HTMLFormElement>, forcedFilters = filters) {
     if (event) {
@@ -144,7 +130,6 @@ export default function Home() {
 
       setResult(data);
       setShowAiPreview(false);
-      await loadHistory();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível processar sua busca agora.");
     } finally {
@@ -171,7 +156,6 @@ export default function Home() {
 
       setResult(data);
       setShowAiPreview(true);
-      await loadHistory();
     } catch (err) {
       setError(err instanceof Error ? err.message : "A IA não conseguiu gerar o esquema agora.");
     } finally {
@@ -222,7 +206,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <section>
           <form onSubmit={handleSearch} className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-xl font-bold">Consultar esquema</h2>
@@ -274,14 +258,6 @@ export default function Home() {
               >
                 Baixar JPG
               </a>
-              <a
-                href="https://www.canva.com/pt_br/"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl border border-violet-400/40 px-5 py-3 font-semibold text-violet-100 hover:border-violet-300"
-              >
-                Editar no Canva
-              </a>
             </div>
 
             {error ? (
@@ -303,27 +279,6 @@ export default function Home() {
               ))}
             </div>
           </form>
-
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-            <h2 className="text-xl font-bold">Funcionalidades incluídas</h2>
-            <ul className="mt-4 space-y-3 text-sm text-slate-300">
-              <li>✅ Busca apenas por marca e motor</li>
-              <li>✅ Geração de imagem JPG com muito mais detalhe</li>
-              <li>✅ IA contextual treinada com histórico técnico do chat</li>
-              <li>✅ Painel técnico com torques e checklist</li>
-              <li>✅ Histórico de pesquisas</li>
-              <li>✅ Favoritos no navegador</li>
-              <li>✅ Base pronta para MongoDB Atlas</li>
-              <li>✅ Estrutura pronta para deploy no GitHub e Vercel</li>
-            </ul>
-
-            <div className="mt-5 rounded-2xl bg-slate-800 p-4 text-sm">
-              <p className="text-slate-300">Modo de armazenamento</p>
-              <p className="mt-1 font-semibold text-white">
-                {result?.storageMode === "mongodb" ? "MongoDB Atlas conectado" : "Demo local pronta para Atlas"}
-              </p>
-            </div>
-          </div>
         </section>
 
         {result ? (
@@ -331,8 +286,8 @@ export default function Home() {
             <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-2xl font-bold">Imagem técnica em JPG</h2>
-                  <p className="text-sm text-slate-400">Montada automaticamente com quadro detalhado de montagem.</p>
+                  <h2 className="text-2xl font-bold">Foto de referência + esquema técnico</h2>
+                  <p className="text-sm text-slate-400">Fontes visuais em alta qualidade para comparar com o manual gerado.</p>
                   {result?.aiProvider ? (
                     <span className="mt-2 inline-flex rounded-full bg-violet-500/15 px-3 py-1 text-xs font-semibold text-violet-200">
                       IA ativa: {result.aiProvider === "gemini" ? "Gemini" : "Assistente local"}
@@ -349,6 +304,29 @@ export default function Home() {
                   </button>
                 ) : null}
               </div>
+
+              {result.publicData.photoGallery?.[0] ? (
+                <div className="mb-4 overflow-hidden rounded-2xl border border-slate-700 bg-slate-950">
+                  <img
+                    src={result.publicData.photoGallery[0].src}
+                    alt={result.publicData.photoGallery[0].title}
+                    className="h-72 w-full object-cover"
+                  />
+                  <div className="flex items-center justify-between gap-3 px-4 py-3 text-sm text-slate-300">
+                    <span>Referência visual: {result.publicData.photoGallery[0].source}</span>
+                    {result.publicData.photoGallery[0].sourceUrl ? (
+                      <a
+                        href={result.publicData.photoGallery[0].sourceUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-semibold text-cyan-300 hover:text-cyan-200"
+                      >
+                        Abrir fonte
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              ) : null}
 
               <img
                 src={result.schemaImageUrl}
@@ -382,14 +360,6 @@ export default function Home() {
                         className="rounded-xl bg-violet-500 px-3 py-2 text-sm font-semibold text-white"
                       >
                         Aprovar e baixar JPG
-                      </a>
-                      <a
-                        href="https://www.canva.com/pt_br/"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="rounded-xl border border-violet-300/40 px-3 py-2 text-sm font-semibold text-violet-100"
-                      >
-                        Ajustar no Canva
                       </a>
                     </div>
                   </div>
@@ -429,44 +399,25 @@ export default function Home() {
                 )}
               </div>
 
-              <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-                <h3 className="text-xl font-bold">Painel da IA</h3>
-                <div className="mt-3 space-y-3 text-sm text-slate-300">
-                  <p>
-                    <strong className="text-white">Fonte:</strong> {result.publicData.sourceLabel}
-                  </p>
-                  {result.aiBlueprint?.headline ? (
-                    <p>
-                      <strong className="text-white">Análise:</strong> {result.aiBlueprint.headline}
-                    </p>
-                  ) : null}
-                  {result.publicData.modelHints?.length ? (
-                    <p>
-                      <strong className="text-white">Modelos relacionados:</strong> {result.publicData.modelHints.join(", ")}
-                    </p>
-                  ) : null}
-                  {result.publicData.duckAnswer ? (
-                    <p>
-                      <strong className="text-white">Resumo público extra:</strong> {result.publicData.duckAnswer}
-                    </p>
-                  ) : null}
-                  {result.publicData.sourceList?.length ? (
-                    <p>
-                      <strong className="text-white">Bases consultadas:</strong> {result.publicData.sourceList.join(", ")}
-                    </p>
-                  ) : null}
-                  {result.aiBlueprint?.recommendedSequence?.length ? (
-                    <div>
-                      <p className="mb-2 font-semibold text-white">Sequência sugerida</p>
-                      <ul className="space-y-1">
-                        {result.aiBlueprint.recommendedSequence.map((step) => (
-                          <li key={step}>• {step}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
+              {result.publicData.photoGallery?.length ? (
+                <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+                  <h3 className="text-xl font-bold">Fotos de referência</h3>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    {result.publicData.photoGallery.slice(0, 4).map((image) => (
+                      <a
+                        key={`${image.src}-${image.source}`}
+                        href={image.sourceUrl || image.src}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="overflow-hidden rounded-2xl border border-slate-700 bg-slate-950"
+                      >
+                        <img src={image.src} alt={image.title} className="h-36 w-full object-cover" />
+                        <div className="px-3 py-2 text-xs text-slate-300">{image.source}</div>
+                      </a>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : null}
 
               {result.publicData.wiki ? (
                 <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
@@ -495,44 +446,14 @@ export default function Home() {
           </section>
         ) : null}
 
-        <section className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-            <h3 className="text-xl font-bold">Sugestões da busca</h3>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {(result?.suggestions || ["Busque uma marca ou um motor para receber sugestões automáticas."]).map((item) => (
-                <span key={item} className="rounded-full bg-slate-800 px-3 py-2 text-sm text-slate-200">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-            <h3 className="text-xl font-bold">Histórico recente</h3>
-            <div className="mt-3 space-y-2">
-              {history.map((item) => (
-                <button
-                  key={`${item._id || item.engine}-${item.createdAt}`}
-                  type="button"
-                  onClick={() =>
-                    applyPreset({
-                      label: `${item.brand || "Motor"} ${item.engine || ""}`.trim(),
-                      brand: item.brand || "",
-                      engine: item.engine || "",
-                      model: item.model || "",
-                    })
-                  }
-                  className="flex w-full items-center justify-between rounded-2xl bg-slate-800 px-3 py-3 text-left text-sm hover:bg-slate-700"
-                >
-                  <span>
-                    {item.brand || "Motor"} {item.engine ? `• ${item.engine}` : ""}
-                  </span>
-                  <span className="text-slate-400">
-                    {item.createdAt ? new Date(item.createdAt).toLocaleDateString("pt-BR") : "demo"}
-                  </span>
-                </button>
-              ))}
-            </div>
+        <section className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
+          <h3 className="text-xl font-bold">Sugestões da busca</h3>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {(result?.suggestions || ["Busque uma marca ou um motor para receber sugestões automáticas."]).map((item) => (
+              <span key={item} className="rounded-full bg-slate-800 px-3 py-2 text-sm text-slate-200">
+                {item}
+              </span>
+            ))}
           </div>
         </section>
       </main>
