@@ -5,11 +5,11 @@ const config: CapacitorConfig = {
   appName: "MT DIESEL ESQUEMAS",
   webDir: "public",
   server: {
-    url: "https://mt-diesel-esquemas.vercel.app",
+    url: "https://motor-schema-ai.vercel.app",
     cleartext: false,
     allowNavigation: [
-      "mt-diesel-esquemas.vercel.app",
       "motor-schema-ai.vercel.app",
+      "mt-diesel-esquemas.vercel.app",
       "raw.githubusercontent.com",
       "wikipedia.org",
       "*.wikipedia.org",
