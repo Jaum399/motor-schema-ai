@@ -19,6 +19,63 @@ export type PublicTechData = {
   photoGallery: PublicTechImage[];
 };
 
+const curatedImageMap: Record<string, PublicTechImage[]> = {
+  iveco: [
+    {
+      src: "https://upload.wikimedia.org/wikipedia/commons/5/56/Transports_Pedretti_-_Flotte_de_camions.JPG",
+      title: "Iveco Stralis",
+      source: "Curadoria visual",
+      sourceUrl: "https://en.wikipedia.org/wiki/Iveco_Stralis",
+    },
+    {
+      src: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Iveco_Trakker_500_Hi-land_2014_%2814054024638%29.jpg",
+      title: "Iveco Trakker",
+      source: "Curadoria visual",
+      sourceUrl: "https://en.wikipedia.org/wiki/Iveco_Trakker",
+    },
+  ],
+  scania: [
+    {
+      src: "https://upload.wikimedia.org/wikipedia/commons/3/36/Scania_113_M_380.jpg",
+      title: "Scania 113",
+      source: "Curadoria visual",
+      sourceUrl: "https://en.wikipedia.org/wiki/Scania_3-series",
+    },
+  ],
+  mercedes: [
+    {
+      src: "https://upload.wikimedia.org/wikipedia/commons/7/72/Mercedes-Benz_Actros_1845_2018.jpg",
+      title: "Mercedes-Benz Actros",
+      source: "Curadoria visual",
+      sourceUrl: "https://en.wikipedia.org/wiki/Mercedes-Benz_Actros",
+    },
+  ],
+  volvo: [
+    {
+      src: "https://upload.wikimedia.org/wikipedia/commons/8/88/2013_Volvo_FH16_540_demotruck.jpg",
+      title: "Volvo FH16",
+      source: "Curadoria visual",
+      sourceUrl: "https://en.wikipedia.org/wiki/Volvo_FH",
+    },
+  ],
+  cummins: [
+    {
+      src: "https://upload.wikimedia.org/wikipedia/commons/7/79/Cummins_Engine_%28LKW%29.jpg",
+      title: "Cummins B Series",
+      source: "Curadoria visual",
+      sourceUrl: "https://en.wikipedia.org/wiki/Cummins_B_Series_engine",
+    },
+  ],
+  mwm: [
+    {
+      src: "https://upload.wikimedia.org/wikipedia/commons/d/dd/MWM%E2%80%93Caterpillar_Waldhofstr%E2%80%93Carl-Benz-Str.jpg",
+      title: "MWM / Caterpillar",
+      source: "Curadoria visual",
+      sourceUrl: "https://en.wikipedia.org/wiki/Caterpillar_Energy_Solutions",
+    },
+  ],
+};
+
 async function safeFetchJson(url: string, extraHeaders: Record<string, string> = {}) {
   try {
     const response = await fetch(url, {
@@ -152,6 +209,22 @@ async function fetchPexelsImages(term: string): Promise<PublicTechImage[]> {
     .slice(0, 4);
 }
 
+function getCuratedFallbackImages(brand?: string) {
+  if (!brand) {
+    return [] as PublicTechImage[];
+  }
+
+  const normalized = brand.toLowerCase();
+
+  for (const key of Object.keys(curatedImageMap)) {
+    if (normalized.includes(key)) {
+      return curatedImageMap[key];
+    }
+  }
+
+  return [] as PublicTechImage[];
+}
+
 function scoreReferenceImage(image: PublicTechImage) {
   const text = `${image.title} ${image.src}`.toLowerCase();
   let score = 0;
@@ -235,7 +308,7 @@ export async function fetchPublicTechnicalData({
       duckAnswer,
       sourceList,
       sourceLabel: sourceList.join(" + "),
-      photoGallery: uniqueGallery.slice(0, 6),
+      photoGallery: (uniqueGallery.length ? uniqueGallery : getCuratedFallbackImages(brand)).slice(0, 6),
     };
   } catch {
     return {
@@ -244,7 +317,7 @@ export async function fetchPublicTechnicalData({
       duckAnswer: null,
       sourceList: fallbackSources,
       sourceLabel: fallbackSources.join(" + "),
-      photoGallery: [],
+      photoGallery: getCuratedFallbackImages(brand),
     };
   }
 }
