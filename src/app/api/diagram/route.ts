@@ -14,7 +14,7 @@ function getEmbeddedFontCss() {
   }
 
   const candidates = [
-    path.join(process.cwd(), "node_modules", "next", "dist", "compiled", "@vercel", "og", "Geist-Regular.ttf"),
+    path.join(process.cwd(), "public", "fonts", "Geist-Regular.ttf"),
   ];
 
   for (const candidate of candidates) {
@@ -23,6 +23,12 @@ function getEmbeddedFontCss() {
       embeddedFontCss = `
         @font-face {
           font-family: 'DejaVu Sans';
+          src: url(data:font/ttf;base64,${base64}) format('truetype');
+          font-style: normal;
+          font-weight: 400 800;
+        }
+        @font-face {
+          font-family: 'MTManual';
           src: url(data:font/ttf;base64,${base64}) format('truetype');
           font-style: normal;
           font-weight: 400 800;
