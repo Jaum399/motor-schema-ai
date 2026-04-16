@@ -271,6 +271,60 @@ export const engineCatalog: EngineRecord[] = [
     ],
     tags: ["g211", "g211-16", "cambio", "mercedes", "16 marchas"],
   },
+  {
+    id: "scania-v8",
+    brand: "Scania",
+    model: "V8",
+    engineCode: "DC16 / DSC V8",
+    family: "Diesel pesado V8",
+    years: "2005-2025",
+    application: "Linha Scania V8 rodoviária e fora de estrada",
+    summary:
+      "Motor V8 com foco em fechamento dos bancos, sincronismo dos comandos e conferência de torques estruturais.",
+    torqueSpecs: [
+      { component: "Cabeçotes", sequence: "Cruzado", value: "Torque angular conforme série" },
+      { component: "Mancais", sequence: "Centro para fora", value: "Pré-carga progressiva" },
+      { component: "Sincronismo", sequence: "Ferramentas de trava", value: "PMS e alinhamento duplo" },
+    ],
+    notes: [
+      "Identificar corretamente os dois bancos do motor V.",
+      "Conferir posição das capas e sincronismo dos comandos.",
+    ],
+    checklist: [
+      "Separar bancadas e sequência de montagem",
+      "Aplicar aperto cruzado no cabeçote",
+      "Sincronizar os dois comandos",
+      "Conferir vedação e reaperto final",
+    ],
+    tags: ["scania", "v8", "dc16", "dsc", "motor v8"],
+  },
+  {
+    id: "cummins-serie-x",
+    brand: "Cummins",
+    model: "Série X",
+    engineCode: "X15 / ISX",
+    family: "Diesel pesado",
+    years: "2010-2025",
+    application: "Linha pesada de alta carga e longa distância",
+    summary:
+      "Família com foco em cabeçote multiestágio, bielas estruturais, sincronismo e conferência dos sistemas auxiliares.",
+    torqueSpecs: [
+      { component: "Cabeçote", sequence: "Multiestágio", value: "Conforme boletim técnico" },
+      { component: "Bielas", sequence: "Controle de alongamento", value: "Parafusos estruturais" },
+      { component: "Mancais", sequence: "Centro para extremidades", value: "Pré-torque + ângulo" },
+    ],
+    notes: [
+      "Conferir EGR, assentamento de camisas e lubrificação.",
+      "Aplicar revisão específica do submodelo X15 ou ISX.",
+    ],
+    checklist: [
+      "Inspecionar camisas e assentos",
+      "Aplicar torques conforme série X",
+      "Sincronizar válvulas e injeção",
+      "Testar sistema de lubrificação",
+    ],
+    tags: ["cummins", "serie x", "x15", "isx", "cummins x"],
+  },
 ];
 
 function normalizeValue(value?: string) {

@@ -82,13 +82,14 @@ export async function generateAiBlueprint({
     return fallback;
   }
 
-  const prompt = `Gere um JSON técnico em português Brasil para um esquema visual mecânico detalhado.
+  const prompt = `Atue como especialista mecânico diesel e responda sempre em português Brasil, com linguagem de oficina profissional.
+Gere um JSON técnico para um esquema visual mecânico detalhado.
 Marca: ${brand || record?.brand || "não informado"}
 Motor: ${engine || record?.engineCode || record?.model || "não informado"}
 Base treinada com histórico técnico do chat:\n${knowledgeContext || "Sem histórico adicional"}
-Objetivo: criar um infográfico técnico semelhante a manual de torque e montagem.
+Objetivo: criar um infográfico técnico semelhante a manual de torque e montagem, sem inventar valores fora da base disponível.
 Retorne estritamente JSON com as chaves: headline, narrative, warnings, detailLines, recommendedSequence.
-Cada array deve ter exatamente 4 itens curtos e objetivos.`;
+Cada array deve ter exatamente 4 itens curtos, objetivos e técnicos.`;
 
   try {
     const response = await fetch(

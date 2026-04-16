@@ -15,6 +15,44 @@ export type KnowledgeEntry = {
 
 export const knowledgeBase: KnowledgeEntry[] = [
   {
+    id: "iveco-cursor-13",
+    brand: "Iveco",
+    engine: "Cursor 13 380",
+    title: "Iveco Cursor 13 380 - montagem completa, cabeçote e biela fraturada",
+    category: "engine",
+    aliases: ["iveco 380", "cursor 13", "f3b 380", "iveco cursor"],
+    summary: "Motor pesado com foco em aperto de mancal, biela fraturada, projeção do pistão, sincronismo, regulagem de válvulas e unidades injetoras.",
+    torqueHighlights: [
+      "Mancais: 80 Nm + 160 Nm + 90°",
+      "Bielas: 60 Nm + 120 Nm + 90°",
+      "Cabeçote: 60 Nm + 120 Nm + 90° + 90°",
+      "Volante: 120 Nm + 90°",
+    ],
+    measurements: [
+      "Projeção do pistão: 0,28 mm a 0,52 mm",
+      "Altura nominal do cabeçote: 130,00 mm + 0,05 mm",
+      "Planicidade do cabeçote: menor que 0,05 mm",
+      "Junta do cabeçote: 1,30 mm a 1,40 mm conforme projeção",
+    ],
+    valveSpecs: [
+      "Folga a frio: admissão 0,40 mm / escape 0,60 mm",
+      "Ordem de ignição: 1 - 4 - 2 - 6 - 3 - 5",
+      "Injetores PDA: soltar 180° e travar conforme revisão",
+      "Sincronismo com 1º cilindro em PMS e ponto 0°",
+    ],
+    mountingTips: [
+      "Usar óleo limpo nas roscas e substituir parafusos de aperto angular",
+      "Biela fraturada exige encaixe perfeito e orientação correta",
+      "Conferir folga entre engrenagens de 0,07 a 0,22 mm",
+      "Dar duas voltas manuais no virabrequim antes da partida",
+    ],
+    partCodes: [
+      "Biela do tipo fraturada com marcação de orientação",
+      "Parafuso máximo do cabeçote: 205,00 mm",
+      "Regulagem de injetor com contraporca controlada",
+    ],
+  },
+  {
     id: "scania-dc12-420",
     brand: "Scania",
     engine: "DC12 420",
@@ -83,18 +121,22 @@ export const knowledgeBase: KnowledgeEntry[] = [
     aliases: ["scania v8", "v8 scania"],
     summary: "Base técnica preparada para esquemas de motores V8 da linha Scania com foco em fechamento e sincronismo.",
     torqueHighlights: [
-      "Consultar série específica do V8 para confirmar torque final",
-      "Aplicar sequência cruzada e controle angular em cabeçote e mancais",
+      "Aplicar sequência cruzada nos dois bancos do V",
+      "Mancais e cabeçotes devem usar aperto angular controlado",
+      "Confirmar torques conforme série DSC ou DC16 da aplicação",
     ],
     measurements: [
-      "Validar projeção de pistão e altura do cabeçote conforme versão",
+      "Validar projeção de pistão e altura do cabeçote em ambos os bancos",
+      "Controlar diferença entre bancadas e sincronismo entre eixos",
     ],
     valveSpecs: [
       "Regular válvulas conforme série DSC/DC16 da aplicação",
+      "Executar sincronismo com o cilindro mestre em PMS",
     ],
     mountingTips: [
       "Identificar corretamente os bancos do V",
       "Executar sincronismo com ferramentas de trava",
+      "Conferir numeração das capas e alinhamento dos comandos",
     ],
     partCodes: [],
   },
@@ -109,15 +151,19 @@ export const knowledgeBase: KnowledgeEntry[] = [
     torqueHighlights: [
       "Cabeçote e mancais devem seguir boletim técnico por série",
       "Aperto angular e reaperto controlado são críticos",
+      "Bielas da série X exigem conferência do alongamento dos parafusos",
     ],
     measurements: [
       "Folgas e projeções dependem do submodelo X15/ISX",
+      "Conferir altura de camisa, assentamento e compressão por cilindro",
     ],
     valveSpecs: [
       "Regular conforme ordem de ignição e revisão do comando",
+      "Ajustar unidades injetoras conforme revisão eletrônica e mecânica",
     ],
     mountingTips: [
       "Conferir EGR, lubrificação e assentamento das camisas",
+      "Aplicar o boletim técnico correto para a série X encontrada",
     ],
     partCodes: [],
   },
@@ -239,6 +285,11 @@ export function findKnowledgeEntries(brand?: string, engine?: string) {
         entry.title,
         entry.summary,
         ...entry.aliases,
+        ...entry.torqueHighlights,
+        ...entry.measurements,
+        ...entry.valveSpecs,
+        ...entry.mountingTips,
+        ...entry.partCodes,
       ].join(" "));
 
       const score = tokens.reduce((acc, token) => acc + (haystack.includes(token) ? 3 : 0), 0);
