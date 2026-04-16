@@ -105,8 +105,10 @@ async function fetchWikipediaGallery(queries: string[]): Promise<PublicTechImage
     });
   });
 
-  const resolved = await Promise.all(requests);
-  return resolved.flat().slice(0, 6);
+  const resolved = await Promise.allSettled(requests);
+  return resolved
+    .flatMap((item) => (item.status === "fulfilled" ? item.value : []))
+    .slice(0, 6);
 }
 
 async function fetchWikimediaImages(term: string): Promise<PublicTechImage[]> {
@@ -182,54 +184,67 @@ export async function fetchPublicTechnicalData({
   engine?: string;
   model?: string;
 }): Promise<PublicTechData> {
-  const searchTerm = [brand, model, engine].filter(Boolean).join(" ") || "motor diesel";
-  const imageQueries = [
-    [brand, model].filter(Boolean).join(" "),
-    [brand, "truck"].filter(Boolean).join(" "),
-    [brand, "engine"].filter(Boolean).join(" "),
-    [model, "engine"].filter(Boolean).join(" "),
-    [engine, "diesel"].filter(Boolean).join(" "),
-  ].filter(Boolean);
+  const fallbackSources = ["Base técnica interna", "NHTSA", "Wikipedia", "Wikimedia Commons", "DuckDuckGo", "Gemini opcional"];
 
-  const [modelHints, wiki, duckAnswer, wikipediaGallery, wikimediaImages, pexelsImages] = await Promise.all([
-    fetchModelHints(brand),
-    fetchWikipediaSummary(searchTerm),
-    fetchDuckAnswer(searchTerm),
-    fetchWikipediaGallery(imageQueries),
-    fetchWikimediaImages(searchTerm),
-    fetchPexelsImages(searchTerm),
-  ]);
+  try {
+    const searchTerm = [brand, model, engine].filter(Boolean).join(" ") || "motor diesel";
+    const imageQueries = [
+      [brand, model].filter(Boolean).join(" "),
+      [brand, "truck"].filter(Boolean).join(" "),
+      [brand, "engine"].filter(Boolean).join(" "),
+      [model, "engine"].filter(Boolean).join(" "),
+      [engine, "diesel"].filter(Boolean).join(" "),
+    ].filter(Boolean);
 
-  const photoGallery = [
-    wiki?.image
-      ? {
-          src: wiki.image,
-          title: wiki.title,
-          source: "Wikipedia",
-          sourceUrl: wiki.url || null,
-        }
-      : null,
-    ...wikipediaGallery,
-    ...wikimediaImages,
-    ...pexelsImages,
-  ].filter((item): item is PublicTechImage => Boolean(item?.src));
+    const [modelHints, wiki, duckAnswer, wikipediaGallery, wikimediaImages, pexelsImages] = await Promise.all([
+      fetchModelHints(brand),
+      fetchWikipediaSummary(searchTerm),
+      fetchDuckAnswer(searchTerm),
+      fetchWikipediaGallery(imageQueries),
+      fetchWikimediaImages(searchTerm),
+      fetchPexelsImages(searchTerm),
+    ]);
 
-  const uniqueGallery = photoGallery
-    .filter((item, index, array) => array.findIndex((entry) => entry.src === item.src) === index)
-    .sort((a, b) => scoreReferenceImage(b) - scoreReferenceImage(a));
+    const photoGallery = [
+      wiki?.image
+        ? {
+            src: wiki.image,
+            title: wiki.title,
+            source: "Wikipedia",
+            sourceUrl: wiki.url || null,
+          }
+        : null,
+      ...wikipediaGallery,
+      ...wikimediaImages,
+      ...pexelsImages,
+    ].filter((item): item is PublicTechImage => Boolean(item?.src));
 
-  const sourceList = ["Base técnica interna", "NHTSA", "Wikipedia", "Wikimedia Commons", "DuckDuckGo"];
-  if (pexelsImages.length) {
-    sourceList.push("Pexels");
+    const uniqueGallery = photoGallery
+      .filter((item, index, array) => array.findIndex((entry) => entry.src === item.src) === index)
+      .sort((a, b) => scoreReferenceImage(b) - scoreReferenceImage(a));
+
+    const sourceList = ["Base técnica interna", "NHTSA", "Wikipedia", "Wikimedia Commons", "DuckDuckGo"];
+    if (pexelsImages.length) {
+      sourceList.push("Pexels");
+    }
+    sourceList.push("Gemini opcional");
+
+    return {
+      modelHints,
+      wiki,
+      duckAnswer,
+      sourceList,
+      sourceLabel: sourceList.join(" + "),
+      photoGallery: uniqueGallery.slice(0, 6),
+    };
+  } catch {
+    return {
+      modelHints: [],
+      wiki: null,
+      duckAnswer: null,
+      sourceList: fallbackSources,
+      sourceLabel: fallbackSources.join(" + "),
+      photoGallery: [],
+    };
   }
-  sourceList.push("Gemini opcional");
-
-  return {
-    modelHints,
-    wiki,
-    duckAnswer,
-    sourceList,
-    sourceLabel: sourceList.join(" + "),
-    photoGallery: uniqueGallery.slice(0, 6),
-  };
 }
