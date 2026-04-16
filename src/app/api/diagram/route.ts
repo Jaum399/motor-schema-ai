@@ -1,12 +1,25 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { ImageResponse } from "next/og";
 import sharp from "sharp";
 import { getEngineById } from "@/data/engines";
 import { findKnowledgeEntries } from "@/data/knowledge-base";
+import { createValveDiagramElement } from "@/lib/valve-diagram-template";
 
 export const runtime = "nodejs";
 
 let embeddedFontCss = "";
+let manualFontData: Buffer | null | undefined;
+
+function getManualFontData() {
+  if (manualFontData !== undefined) {
+    return manualFontData;
+  }
+
+  const candidate = path.join(process.cwd(), "public", "fonts", "Geist-Regular.ttf");
+  manualFontData = existsSync(candidate) ? readFileSync(candidate) : null;
+  return manualFontData;
+}
 
 function getEmbeddedFontCss() {
   if (embeddedFontCss) {
@@ -542,33 +555,62 @@ export async function GET(request: Request) {
 
   const title = `${aiMode ? "GUIA TECNICO GERADO POR IA" : "GUIA TECNICO DE MONTAGEM E TORQUES"} - ${brand} ${model}`.toUpperCase();
 
-  const svg = isValveFocused
-    ? renderValveRegulationSheet({
-        brand,
-        model,
-        engine,
-        regulationLines,
-        measureLines,
-        noteLines,
-      })
-    : renderAssemblySheet({
-        title,
-        engine,
-        isGearbox,
-        torqueSpecs,
-        regulationLines,
-        measureLines,
-        noteLines,
-        referenceLines,
-        matchedFamily: matched?.family || (isGearbox ? "Transmissao pesada" : "Diesel pesado"),
-        matchedApplication: matched?.application || primaryKnowledge?.summary || "Consulta tecnica assistida",
-        matchedYears: matched?.years || "Base tecnica consolidada",
-        aiMode,
-      });
+  let imageBuffer: Buffer;
 
-  const imageBuffer = await sharp(Buffer.from(svg, "utf8"))
-    .jpeg({ quality: 97, mozjpeg: true })
-    .toBuffer();
+  if (isValveFocused) {
+    const clearances = inferValveClearances([...regulationLines, ...measureLines, ...noteLines], brand, engine);
+    const firingOrder = inferFiringOrder(regulationLines);
+    const fontData = getManualFontData();
+
+    const imageResponse = new ImageResponse(
+      createValveDiagramElement({
+        title: `ESQUEMA DE REGULAGEM DE VALVULAS: MOTOR ${brand} ${model || engine}`.toUpperCase(),
+        firingOrder,
+        admission: clearances.admission,
+        exhaust: clearances.exhaust,
+        notes: noteLines,
+        procedure: buildBalanceProcedure(),
+      }),
+      {
+        width: 2200,
+        height: 1500,
+        ...(fontData
+          ? {
+              fonts: [
+                {
+                  name: "MTManual",
+                  data: fontData,
+                  style: "normal" as const,
+                  weight: 400 as const,
+                },
+              ],
+            }
+          : {}),
+      }
+    );
+
+    const pngBuffer = Buffer.from(await imageResponse.arrayBuffer());
+    imageBuffer = await sharp(pngBuffer).jpeg({ quality: 97, mozjpeg: true }).toBuffer();
+  } else {
+    const svg = renderAssemblySheet({
+      title,
+      engine,
+      isGearbox,
+      torqueSpecs,
+      regulationLines,
+      measureLines,
+      noteLines,
+      referenceLines,
+      matchedFamily: matched?.family || (isGearbox ? "Transmissao pesada" : "Diesel pesado"),
+      matchedApplication: matched?.application || primaryKnowledge?.summary || "Consulta tecnica assistida",
+      matchedYears: matched?.years || "Base tecnica consolidada",
+      aiMode,
+    });
+
+    imageBuffer = await sharp(Buffer.from(svg, "utf8"))
+      .jpeg({ quality: 97, mozjpeg: true })
+      .toBuffer();
+  }
 
   return new Response(new Uint8Array(imageBuffer), {
     headers: {
