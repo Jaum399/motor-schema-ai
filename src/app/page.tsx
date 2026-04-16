@@ -221,6 +221,13 @@ export default function Home() {
   }
 
   const mainResult = result?.results?.[0];
+  const aiProviderLabel = result?.aiProvider === "gemini"
+    ? "Gemini"
+    : result?.aiProvider === "openai"
+      ? "ChatGPT"
+      : result?.aiProvider === "openrouter"
+        ? "OpenRouter"
+        : "Assistente local";
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -338,7 +345,7 @@ export default function Home() {
                   <p className="text-sm text-slate-400">Visual mecânico focado somente no esquema gerado em padrão de manual.</p>
                   {result?.aiProvider ? (
                     <span className="mt-2 inline-flex rounded-full bg-violet-500/15 px-3 py-1 text-xs font-semibold text-violet-200">
-                      IA ativa: {result.aiProvider === "gemini" ? "Gemini" : "Assistente local"}
+                      IA ativa: {aiProviderLabel}
                     </span>
                   ) : null}
                 </div>

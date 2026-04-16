@@ -5,6 +5,7 @@ import sharp from "sharp";
 import { getEngineById } from "@/data/engines";
 import { findKnowledgeEntries } from "@/data/knowledge-base";
 import { createValveDiagramElement } from "@/lib/valve-diagram-template";
+import { createAssemblyDiagramElement } from "@/lib/assembly-diagram-template";
 import { generateAiBlueprint, generateGeminiMechanicalBase } from "@/lib/ai-schema";
 
 export const runtime = "nodejs";
@@ -788,37 +789,44 @@ export async function GET(request: Request) {
     const pngBuffer = Buffer.from(await imageResponse.arrayBuffer());
     imageBuffer = await sharp(pngBuffer).jpeg({ quality: 97, mozjpeg: true }).toBuffer();
   } else {
-    const svg = isVEngine
-      ? renderVEngineServiceSheet({
-          title,
-          engine,
-          torqueSpecs,
-          measureLines,
-          noteLines,
-          referenceLines,
-          geminiIllustration,
-          componentFocus,
-        })
-      : renderAssemblySheet({
-          title,
-          engine,
-          isGearbox,
-          torqueSpecs,
-          regulationLines,
-          measureLines,
-          noteLines,
-          referenceLines,
-          matchedFamily: matched?.family || (isGearbox ? "Transmissao pesada" : "Diesel pesado"),
-          matchedApplication: matched?.application || primaryKnowledge?.summary || "Consulta tecnica assistida",
-          matchedYears: matched?.years || "Base tecnica consolidada",
-          aiMode,
-          geminiIllustration,
-          componentFocus,
-        });
+    const fontData = getManualFontData();
+    const imageResponse = new ImageResponse(
+      createAssemblyDiagramElement({
+        title,
+        engine,
+        variant: isVEngine ? "v-engine" : isGearbox ? "gearbox" : "inline",
+        torqueSpecs,
+        regulationLines,
+        measureLines,
+        noteLines,
+        referenceLines,
+        matchedFamily: matched?.family || (isGearbox ? "Transmissao pesada" : "Diesel pesado"),
+        matchedApplication: matched?.application || primaryKnowledge?.summary || "Consulta tecnica assistida",
+        matchedYears: matched?.years || "Base tecnica consolidada",
+        aiMode,
+        illustrationDataUrl: geminiIllustration,
+        componentFocus,
+      }),
+      {
+        width: 2200,
+        height: 1500,
+        ...(fontData
+          ? {
+              fonts: [
+                {
+                  name: "MTManual",
+                  data: fontData,
+                  style: "normal" as const,
+                  weight: 400 as const,
+                },
+              ],
+            }
+          : {}),
+      }
+    );
 
-    imageBuffer = await sharp(Buffer.from(svg, "utf8"))
-      .jpeg({ quality: 97, mozjpeg: true })
-      .toBuffer();
+    const pngBuffer = Buffer.from(await imageResponse.arrayBuffer());
+    imageBuffer = await sharp(pngBuffer).jpeg({ quality: 97, mozjpeg: true }).toBuffer();
   }
 
   return new Response(new Uint8Array(imageBuffer), {

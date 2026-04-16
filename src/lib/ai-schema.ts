@@ -4,7 +4,7 @@ import { findKnowledgeEntries } from "@/data/knowledge-base";
 export type LayoutHint = "valve" | "inline" | "v-engine" | "gearbox";
 
 export type AiBlueprint = {
-  provider: "gemini" | "fallback";
+  provider: "gemini" | "openai" | "openrouter" | "fallback";
   headline: string;
   narrative: string;
   warnings: string[];
@@ -49,6 +49,77 @@ function normalizeLayoutHint(value: unknown, fallback: LayoutHint) {
   return value === "valve" || value === "inline" || value === "v-engine" || value === "gearbox"
     ? value
     : fallback;
+}
+
+function parseJsonText(rawText: string) {
+  const cleaned = rawText.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```$/i, "").trim();
+  return JSON.parse(cleaned);
+}
+
+async function tryOpenAiCompatibleBlueprint({
+  apiKey,
+  endpoint,
+  model,
+  prompt,
+  provider,
+  fallback,
+  extraHeaders,
+}: {
+  apiKey: string;
+  endpoint: string;
+  model: string;
+  prompt: string;
+  provider: "openai" | "openrouter";
+  fallback: AiBlueprint;
+  extraHeaders?: Record<string, string>;
+}): Promise<AiBlueprint | null> {
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        ...(extraHeaders || {}),
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.35,
+        response_format: { type: "json_object" },
+      }),
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const payload = await response.json();
+    const rawText = payload?.choices?.[0]?.message?.content;
+    if (!rawText) {
+      return null;
+    }
+
+    const parsed = parseJsonText(rawText);
+
+    return {
+      provider,
+      headline: safeText(parsed.headline, fallback.headline),
+      narrative: safeText(parsed.narrative, fallback.narrative),
+      warnings: safeStringArray(parsed.warnings, fallback.warnings, 4),
+      detailLines: safeStringArray(parsed.detailLines, fallback.detailLines, 4),
+      recommendedSequence: safeStringArray(parsed.recommendedSequence, fallback.recommendedSequence, 4),
+      layoutHint: normalizeLayoutHint(parsed.layoutHint, fallback.layoutHint),
+      componentFocus: safeStringArray(parsed.componentFocus, fallback.componentFocus, 4),
+      imagePrompt: safeText(parsed.imagePrompt, fallback.imagePrompt),
+    };
+  } catch {
+    return null;
+  }
 }
 
 export function buildFallbackBlueprint({
@@ -114,6 +185,8 @@ export async function generateAiBlueprint({
 }): Promise<AiBlueprint> {
   const fallback = buildFallbackBlueprint({ record, brand, engine });
   const apiKey = process.env.GEMINI_API_KEY;
+  const openAiKey = process.env.OPENAI_API_KEY;
+  const openRouterKey = process.env.OPENROUTER_API_KEY;
   const knowledge = findKnowledgeEntries(brand || record?.brand, engine || record?.engineCode);
   const knowledgeContext = knowledge
     .map(
@@ -122,7 +195,7 @@ export async function generateAiBlueprint({
     )
     .join("\n\n");
 
-  if (!apiKey) {
+  if (!apiKey && !openAiKey && !openRouterKey) {
     return fallback;
   }
 
@@ -151,52 +224,88 @@ Regras:
 - layoutHint deve ser apenas: valve, inline, v-engine ou gearbox
 - imagePrompt deve pedir uma ilustracao mecanica hiper-realista, com acabamento igual manual original, metais, parafusos, tubulacoes, callouts numerados e pagina de oficina diesel, sem aspecto cartum.`;
 
-  const models = ["gemini-2.0-flash", "gemini-2.0-flash-lite"];
+  if (apiKey) {
+    const models = ["gemini-2.0-flash", "gemini-2.0-flash-lite"];
 
-  for (const modelName of models) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.35,
-              responseMimeType: "application/json",
+    for (const modelName of models) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
             },
-          }),
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.35,
+                responseMimeType: "application/json",
+              },
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          continue;
         }
-      );
 
-      if (!response.ok) {
+        const payload = await response.json();
+        const rawText = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!rawText) {
+          continue;
+        }
+
+        const parsed = parseJsonText(rawText);
+
+        return {
+          provider: "gemini",
+          headline: safeText(parsed.headline, fallback.headline),
+          narrative: safeText(parsed.narrative, fallback.narrative),
+          warnings: safeStringArray(parsed.warnings, fallback.warnings, 4),
+          detailLines: safeStringArray(parsed.detailLines, fallback.detailLines, 4),
+          recommendedSequence: safeStringArray(parsed.recommendedSequence, fallback.recommendedSequence, 4),
+          layoutHint: normalizeLayoutHint(parsed.layoutHint, fallback.layoutHint),
+          componentFocus: safeStringArray(parsed.componentFocus, fallback.componentFocus, 4),
+          imagePrompt: safeText(parsed.imagePrompt, fallback.imagePrompt),
+        };
+      } catch {
         continue;
       }
+    }
+  }
 
-      const payload = await response.json();
-      const rawText = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!rawText) {
-        continue;
-      }
+  if (openAiKey) {
+    const openAiResult = await tryOpenAiCompatibleBlueprint({
+      apiKey: openAiKey,
+      endpoint: "https://api.openai.com/v1/chat/completions",
+      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      prompt,
+      provider: "openai",
+      fallback,
+    });
 
-      const parsed = JSON.parse(rawText);
+    if (openAiResult) {
+      return openAiResult;
+    }
+  }
 
-      return {
-        provider: "gemini",
-        headline: safeText(parsed.headline, fallback.headline),
-        narrative: safeText(parsed.narrative, fallback.narrative),
-        warnings: safeStringArray(parsed.warnings, fallback.warnings, 4),
-        detailLines: safeStringArray(parsed.detailLines, fallback.detailLines, 4),
-        recommendedSequence: safeStringArray(parsed.recommendedSequence, fallback.recommendedSequence, 4),
-        layoutHint: normalizeLayoutHint(parsed.layoutHint, fallback.layoutHint),
-        componentFocus: safeStringArray(parsed.componentFocus, fallback.componentFocus, 4),
-        imagePrompt: safeText(parsed.imagePrompt, fallback.imagePrompt),
-      };
-    } catch {
-      continue;
+  if (openRouterKey) {
+    const openRouterResult = await tryOpenAiCompatibleBlueprint({
+      apiKey: openRouterKey,
+      endpoint: "https://openrouter.ai/api/v1/chat/completions",
+      model: process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini",
+      prompt,
+      provider: "openrouter",
+      fallback,
+      extraHeaders: {
+        "HTTP-Referer": process.env.NEXT_PUBLIC_SITE_URL || "https://motor-schema-ai.vercel.app",
+        "X-Title": "MT DIESEL ESQUEMAS",
+      },
+    });
+
+    if (openRouterResult) {
+      return openRouterResult;
     }
   }
 
