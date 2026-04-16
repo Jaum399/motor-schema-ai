@@ -1,11 +1,27 @@
-﻿import sharp from "sharp";
+﻿import path from "node:path";
+import { readFile } from "node:fs/promises";
+import sharp from "sharp";
+import { ImageResponse } from "next/og";
 import { getEngineById } from "@/data/engines";
 import { findKnowledgeEntries } from "@/data/knowledge-base";
 import { generateAiBlueprint, generateGeminiMechanicalBase } from "@/lib/ai-schema";
+import { createAssemblyDiagramElement } from "@/lib/assembly-diagram-template";
+import { createValveDiagramElement } from "@/lib/valve-diagram-template";
 
 export const runtime = "nodejs";
 
 let embeddedFontCss = "";
+let manualFontDataPromise: Promise<ArrayBuffer | null> | null = null;
+
+async function getManualFontData() {
+  if (!manualFontDataPromise) {
+    manualFontDataPromise = readFile(path.join(process.cwd(), "public", "fonts", "Geist-Regular.ttf"))
+      .then((buffer) => buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer)
+      .catch(() => null);
+  }
+
+  return manualFontDataPromise;
+}
 
 function getEmbeddedFontCss() {
   if (embeddedFontCss) {
@@ -174,9 +190,14 @@ function inferLayoutFlavor({
   if (isGearbox) return "gearbox" as const;
 
   const combined = normalizeManualText([brand, model, engine, title || ""].join(" ")).toLowerCase();
+  const normalizedTitle = normalizeManualText(title || "").toLowerCase();
 
   if (/v8|dc16|dsc/.test(combined)) return "v-engine" as const;
-  if (/valv|regul|folga|balanc|om352|x10|6taa/.test(combined)) return "valve" as const;
+
+  const valveHints = /valv|regul|folga|balanc|admiss|escap/.test(normalizedTitle) ||
+    /valv|regul|folga|balanc|admiss|escap/.test(combined);
+
+  if (valveHints) return "valve" as const;
   return "inline" as const;
 }
 
@@ -623,6 +644,7 @@ export async function GET(request: Request) {
   const engine = searchParams.get("engine") || "Diesel";
   const download = searchParams.get("download") === "1";
   const aiMode = searchParams.get("mode") === "ai";
+  const requestedTitle = normalizeManualText(searchParams.get("title") || "").trim();
 
   const matched = getEngineById(id);
   const knowledge = findKnowledgeEntries(brand, engine);
@@ -639,7 +661,7 @@ export async function GET(request: Request) {
     brand,
     model,
     engine,
-    title: primaryKnowledge?.title,
+    title: requestedTitle || primaryKnowledge?.title,
     isGearbox,
   });
   const isValveFocused = layoutFlavor === "valve";
@@ -713,7 +735,7 @@ export async function GET(request: Request) {
     ? `${brand} ${normalizedEngine} (${normalizedModel})`
     : `${brand} ${normalizedModel || normalizedEngine}`;
 
-  const title = `${aiMode ? "GUIA TECNICO DE MONTAGEM E TORQUES" : "GUIA TECNICO DE MONTAGEM E TORQUES"} - MOTOR ${displayEngineLabel}`.toUpperCase();
+  const title = (requestedTitle || `GUIA TECNICO DE MONTAGEM E TORQUES - MOTOR ${displayEngineLabel}`).toUpperCase();
   const geminiIllustration = aiMode && aiBlueprint
     ? await generateGeminiMechanicalBase({
         brand,
@@ -723,51 +745,66 @@ export async function GET(request: Request) {
       })
     : null;
 
+  const fontData = await getManualFontData();
+  const imageOptions = {
+    width: 2200,
+    height: 1500,
+    ...(fontData
+      ? {
+          fonts: [
+            {
+              name: "MTManual",
+              data: fontData,
+              style: "normal" as const,
+              weight: 400 as const,
+            },
+          ],
+        }
+      : {}),
+  };
+
   let imageBuffer: Buffer;
 
   if (isValveFocused) {
-    const svg = renderValveRegulationSheet({
-      brand,
-      model,
-      engine,
-      regulationLines,
-      measureLines,
-      noteLines,
-    });
+    const clearances = inferValveClearances([...regulationLines, ...measureLines, ...noteLines], brand, engine);
+    const response = new ImageResponse(
+      createValveDiagramElement({
+        title,
+        firingOrder: inferFiringOrder(regulationLines),
+        admission: clearances.admission,
+        exhaust: clearances.exhaust,
+        notes: mergeUniqueLines(noteLines, measureLines, regulationLines).slice(0, 6),
+        procedure: buildBalanceProcedure(),
+        illustrationDataUrl: geminiIllustration,
+      }),
+      imageOptions,
+    );
 
-    imageBuffer = await sharp(Buffer.from(svg, "utf8"))
+    imageBuffer = await sharp(Buffer.from(await response.arrayBuffer()))
       .jpeg({ quality: 97, mozjpeg: true })
       .toBuffer();
   } else {
-    const svg = isVEngine
-      ? renderVEngineServiceSheet({
-          title,
-          engine,
-          torqueSpecs,
-          measureLines,
-          noteLines,
-          referenceLines,
-          geminiIllustration,
-          componentFocus,
-        })
-      : renderAssemblySheet({
-          title,
-          engine,
-          isGearbox,
-          torqueSpecs,
-          regulationLines,
-          measureLines,
-          noteLines,
-          referenceLines,
-          matchedFamily: matched?.family || (isGearbox ? "Transmissao pesada" : "Diesel pesado"),
-          matchedApplication: matched?.application || primaryKnowledge?.summary || "Consulta tecnica assistida",
-          matchedYears: matched?.years || "Base tecnica consolidada",
-          aiMode,
-          geminiIllustration,
-          componentFocus,
-        });
+    const response = new ImageResponse(
+      createAssemblyDiagramElement({
+        title,
+        engine,
+        variant: isGearbox ? "gearbox" : isVEngine ? "v-engine" : "inline",
+        torqueSpecs,
+        regulationLines,
+        measureLines,
+        noteLines,
+        referenceLines,
+        matchedFamily: matched?.family || (isGearbox ? "Transmissao pesada" : "Diesel pesado"),
+        matchedApplication: matched?.application || primaryKnowledge?.summary || "Consulta tecnica assistida",
+        matchedYears: matched?.years || "Base tecnica consolidada",
+        aiMode,
+        illustrationDataUrl: geminiIllustration,
+        componentFocus,
+      }),
+      imageOptions,
+    );
 
-    imageBuffer = await sharp(Buffer.from(svg, "utf8"))
+    imageBuffer = await sharp(Buffer.from(await response.arrayBuffer()))
       .jpeg({ quality: 97, mozjpeg: true })
       .toBuffer();
   }
