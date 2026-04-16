@@ -86,9 +86,9 @@ export async function GET(request: Request) {
     chassis: searchParams.get("chassis") || "",
   };
 
-  if (!filters.brand && !filters.model && !filters.engine && !filters.chassis) {
+  if (!filters.brand && !filters.engine) {
     return NextResponse.json(
-      { error: "Informe ao menos marca, modelo, motor ou chassi." },
+      { error: "Informe ao menos a marca ou o motor." },
       { status: 400 }
     );
   }
@@ -99,10 +99,10 @@ export async function GET(request: Request) {
     .filter(Boolean)
     .join(" ");
 
-  const [vinDecode, modelHints, wiki] = await Promise.all([
+  const [, modelHints, wiki] = await Promise.all([
     fetchVinDecode(filters.chassis),
     fetchModelHints(filters.brand),
-    fetchWikipediaSummary(referenceTerm || filters.brand || filters.model || "motor diesel"),
+    fetchWikipediaSummary(referenceTerm || filters.brand || filters.engine || "motor diesel"),
   ]);
 
   const schemaImageUrl = `/api/diagram?id=${encodeURIComponent(bestMatch?.id || "custom")}&brand=${encodeURIComponent(
@@ -133,11 +133,10 @@ export async function GET(request: Request) {
   return NextResponse.json({
     query: filters,
     results,
-    aiSummary: createAiAssemblySummary(bestMatch, vinDecode),
+    aiSummary: createAiAssemblySummary(bestMatch, null),
     suggestions: buildSearchSuggestions(results, filters),
     schemaImageUrl,
     publicData: {
-      vinDecode,
       modelHints,
       wiki,
       sourceLabel: "NHTSA + Wikipedia",

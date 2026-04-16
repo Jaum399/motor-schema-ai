@@ -27,7 +27,6 @@ type HistoryItem = {
   brand?: string;
   model?: string;
   engine?: string;
-  chassis?: string;
   createdAt?: string;
 };
 
@@ -40,7 +39,6 @@ type SearchResponse = {
   publicData: {
     sourceLabel: string;
     modelHints?: string[];
-    vinDecode?: Record<string, string> | null;
     wiki?: {
       title: string;
       extract: string;
@@ -51,16 +49,23 @@ type SearchResponse = {
   results: ResultItem[];
 };
 
-const presets = [
-  { label: "Iveco Cursor 13", brand: "Iveco", model: "Cursor 13", engine: "F3B 380", chassis: "" },
-  { label: "Cummins ISX", brand: "Cummins", model: "ISX 450", engine: "X15", chassis: "" },
-  { label: "Volvo D13", brand: "Volvo", model: "D13", engine: "D13K", chassis: "" },
+type SearchForm = {
+  label: string;
+  brand: string;
+  engine: string;
+  model?: string;
+};
+
+const presets: SearchForm[] = [
+  { label: "Iveco F3B 380", brand: "Iveco", engine: "F3B 380", model: "Cursor 13" },
+  { label: "Cummins X15", brand: "Cummins", engine: "X15", model: "ISX 450" },
+  { label: "Volvo D13K", brand: "Volvo", engine: "D13K", model: "D13" },
 ];
 
-const initialFilters = presets[0];
+const initialFilters: SearchForm = presets[0];
 
 export default function Home() {
-  const [filters, setFilters] = useState(initialFilters);
+  const [filters, setFilters] = useState<SearchForm>(initialFilters);
   const [result, setResult] = useState<SearchResponse | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -99,9 +104,9 @@ export default function Home() {
 
     try {
       const params = new URLSearchParams();
-      Object.entries(forcedFilters).forEach(([key, value]) => {
-        if (value) params.set(key, value);
-      });
+      if (forcedFilters.brand) params.set("brand", forcedFilters.brand);
+      if (forcedFilters.engine) params.set("engine", forcedFilters.engine);
+      if (forcedFilters.model) params.set("model", forcedFilters.model);
 
       const response = await fetch(`/api/search?${params.toString()}`, { cache: "no-store" });
       const data = await response.json();
@@ -119,7 +124,7 @@ export default function Home() {
     }
   }
 
-  function applyPreset(preset: (typeof presets)[number]) {
+  function applyPreset(preset: SearchForm) {
     setFilters(preset);
     void handleSearch(undefined, preset);
   }
@@ -147,17 +152,17 @@ export default function Home() {
                 Motor Schema AI
               </span>
               <h1 className="text-3xl font-black tracking-tight text-white sm:text-5xl">
-                Busca inteligente de esquemas de montagem de motor
+                Busque esquemas por marca e motor
               </h1>
               <p className="max-w-2xl text-sm text-slate-300 sm:text-base">
-                Pesquise por marca, modelo, código do motor ou chassi. O sistema cruza catálogo técnico,
-                APIs públicas e gera uma imagem SVG pronta para consulta em oficina ou engenharia.
+                Informe apenas a marca e o código do motor. O sistema cruza referências técnicas e gera uma
+                imagem JPG detalhada com etapas, torques e pontos críticos de montagem.
               </p>
             </div>
             <div className="grid gap-3 text-sm text-slate-200 sm:grid-cols-3">
-              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">🔎 Busca por marca, modelo e VIN</div>
-              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">🧠 Imagem técnica gerada automaticamente</div>
-              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">☁️ Pronto para Vercel + MongoDB</div>
+              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">🔎 Busca simplificada por marca e motor</div>
+              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">🖼️ Imagem JPG técnica detalhada</div>
+              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">☁️ Catálogo pronto para produção</div>
             </div>
           </div>
         </section>
@@ -167,7 +172,7 @@ export default function Home() {
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-xl font-bold">Consultar esquema</h2>
               <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300">
-                React + Next.js
+                Busca objetiva
               </span>
             </div>
 
@@ -182,29 +187,11 @@ export default function Home() {
                 />
               </label>
               <label className="space-y-2">
-                <span className="text-sm text-slate-300">Modelo</span>
-                <input
-                  value={filters.model}
-                  onChange={(e) => setFilters({ ...filters, model: e.target.value })}
-                  placeholder="Ex.: Cursor 13"
-                  className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                />
-              </label>
-              <label className="space-y-2">
                 <span className="text-sm text-slate-300">Motor</span>
                 <input
                   value={filters.engine}
                   onChange={(e) => setFilters({ ...filters, engine: e.target.value })}
                   placeholder="Ex.: F3B 380"
-                  className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none placeholder:text-slate-500 focus:border-cyan-400"
-                />
-              </label>
-              <label className="space-y-2">
-                <span className="text-sm text-slate-300">Chassi / VIN</span>
-                <input
-                  value={filters.chassis}
-                  onChange={(e) => setFilters({ ...filters, chassis: e.target.value })}
-                  placeholder="Ex.: 9BWZZZ377VT004251"
                   className="w-full rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none placeholder:text-slate-500 focus:border-cyan-400"
                 />
               </label>
@@ -215,7 +202,7 @@ export default function Home() {
                 type="submit"
                 className="rounded-2xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-400"
               >
-                {loading ? "Buscando..." : "Gerar esquema"}
+                {loading ? "Buscando..." : "Gerar imagem JPG"}
               </button>
               <a
                 href={result?.schemaImageUrl ? `${result.schemaImageUrl}&download=1` : "#"}
@@ -223,7 +210,7 @@ export default function Home() {
                 rel="noreferrer"
                 className="rounded-2xl border border-slate-700 px-5 py-3 font-semibold text-slate-100 hover:border-cyan-400"
               >
-                Baixar SVG
+                Baixar JPG
               </a>
             </div>
 
@@ -250,9 +237,9 @@ export default function Home() {
           <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <h2 className="text-xl font-bold">Funcionalidades incluídas</h2>
             <ul className="mt-4 space-y-3 text-sm text-slate-300">
-              <li>✅ Busca por marca, modelo, motor e chassi</li>
-              <li>✅ Integração com APIs públicas de veículos</li>
-              <li>✅ Geração visual do esquema em SVG</li>
+              <li>✅ Busca apenas por marca e motor</li>
+              <li>✅ Geração de imagem JPG com muito mais detalhe</li>
+              <li>✅ Painel técnico com torques e checklist</li>
               <li>✅ Histórico de pesquisas</li>
               <li>✅ Favoritos no navegador</li>
               <li>✅ Base pronta para MongoDB Atlas</li>
@@ -273,8 +260,8 @@ export default function Home() {
             <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-2xl font-bold">Esquema gerado</h2>
-                  <p className="text-sm text-slate-400">Baseado no catálogo interno, APIs públicas e análise heurística.</p>
+                  <h2 className="text-2xl font-bold">Imagem técnica em JPG</h2>
+                  <p className="text-sm text-slate-400">Montada automaticamente com quadro detalhado de montagem.</p>
                 </div>
                 {mainResult ? (
                   <button
@@ -289,7 +276,7 @@ export default function Home() {
 
               <img
                 src={result.schemaImageUrl}
-                alt="Esquema técnico gerado"
+                alt="Imagem JPG do esquema técnico"
                 className="w-full rounded-2xl border border-slate-700 bg-white"
               />
 
@@ -336,16 +323,6 @@ export default function Home() {
                   <p>
                     <strong className="text-white">Fonte:</strong> {result.publicData.sourceLabel}
                   </p>
-                  {result.publicData.vinDecode?.Make ? (
-                    <p>
-                      <strong className="text-white">Fabricante pelo chassi:</strong> {result.publicData.vinDecode.Make}
-                    </p>
-                  ) : null}
-                  {result.publicData.vinDecode?.Model ? (
-                    <p>
-                      <strong className="text-white">Modelo pelo chassi:</strong> {result.publicData.vinDecode.Model}
-                    </p>
-                  ) : null}
                   {result.publicData.modelHints?.length ? (
                     <p>
                       <strong className="text-white">Modelos relacionados:</strong> {result.publicData.modelHints.join(", ")}
@@ -385,7 +362,7 @@ export default function Home() {
           <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
             <h3 className="text-xl font-bold">Sugestões da busca</h3>
             <div className="mt-3 flex flex-wrap gap-2">
-              {(result?.suggestions || ["Busque um motor para receber sugestões automáticas."]).map((item) => (
+              {(result?.suggestions || ["Busque uma marca ou um motor para receber sugestões automáticas."]).map((item) => (
                 <span key={item} className="rounded-full bg-slate-800 px-3 py-2 text-sm text-slate-200">
                   {item}
                 </span>
@@ -398,21 +375,20 @@ export default function Home() {
             <div className="mt-3 space-y-2">
               {history.map((item) => (
                 <button
-                  key={`${item._id || item.chassis}-${item.createdAt}`}
+                  key={`${item._id || item.engine}-${item.createdAt}`}
                   type="button"
                   onClick={() =>
                     applyPreset({
-                      label: `${item.brand || "Motor"} ${item.model || ""}`.trim(),
+                      label: `${item.brand || "Motor"} ${item.engine || ""}`.trim(),
                       brand: item.brand || "",
-                      model: item.model || "",
                       engine: item.engine || "",
-                      chassis: item.chassis || "",
+                      model: item.model || "",
                     })
                   }
                   className="flex w-full items-center justify-between rounded-2xl bg-slate-800 px-3 py-3 text-left text-sm hover:bg-slate-700"
                 >
                   <span>
-                    {item.brand || "Motor"} {item.model || ""} {item.engine ? `• ${item.engine}` : ""}
+                    {item.brand || "Motor"} {item.engine ? `• ${item.engine}` : ""}
                   </span>
                   <span className="text-slate-400">
                     {item.createdAt ? new Date(item.createdAt).toLocaleDateString("pt-BR") : "demo"}

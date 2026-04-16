@@ -1,4 +1,7 @@
+import sharp from "sharp";
 import { getEngineById } from "@/data/engines";
+
+export const runtime = "nodejs";
 
 function escapeXml(value: string) {
   return value
@@ -7,6 +10,15 @@ function escapeXml(value: string) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&apos;");
+}
+
+function renderLines(lines: string[], x: number, startY: number, color: string, size = 20, weight = 400) {
+  return lines
+    .map(
+      (line, index) =>
+        `<text x="${x}" y="${startY + index * (size + 10)}" fill="${color}" font-size="${size}" font-family="Arial" font-weight="${weight}">${escapeXml(line)}</text>`
+    )
+    .join("");
 }
 
 export async function GET(request: Request) {
@@ -22,76 +34,108 @@ export async function GET(request: Request) {
     "Validar bronzinas e folgas",
     "Aplicar sequência do cabeçote",
     "Sincronizar comando em PMS",
-    "Conferir injeção e reaperto",
+    "Conferir injeção e reaperto final",
   ]).slice(0, 4);
 
-  const torqueLine = matched?.torqueSpecs
-    ?.slice(0, 3)
-    .map((item) => `${item.component}: ${item.value}`)
-    .join(" • ");
+  const torqueSpecs = (matched?.torqueSpecs || [
+    { component: "Cabeçote", sequence: "Centro para fora", value: "Aperto progressivo + angular" },
+    { component: "Mancais", sequence: "Sequência linear", value: "Pré-carga controlada" },
+    { component: "Bielas", sequence: "Par graduado", value: "Torque em estágios" },
+  ]).slice(0, 4);
+
+  const noteLines = (matched?.notes || [
+    "Usar lubrificação limpa nas roscas críticas.",
+    "Conferir planicidade e altura do cabeçote.",
+    "Substituir parafusos com aperto angular.",
+  ]).slice(0, 3);
 
   const svg = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-label="Esquema técnico gerado">
+  <svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200" role="img" aria-label="Esquema técnico detalhado em JPG">
     <defs>
       <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-        <stop offset="0%" stop-color="#07111f" />
-        <stop offset="100%" stop-color="#10325d" />
+        <stop offset="0%" stop-color="#06101d" />
+        <stop offset="100%" stop-color="#123d63" />
       </linearGradient>
-      <linearGradient id="card" x1="0" x2="1">
+      <linearGradient id="panelLight" x1="0" x2="1">
         <stop offset="0%" stop-color="#eff6ff" />
         <stop offset="100%" stop-color="#dbeafe" />
       </linearGradient>
+      <linearGradient id="panelWarn" x1="0" x2="1">
+        <stop offset="0%" stop-color="#fff7ed" />
+        <stop offset="100%" stop-color="#ffedd5" />
+      </linearGradient>
     </defs>
-    <rect width="1400" height="900" fill="url(#bg)" rx="28" />
-    <text x="60" y="80" fill="#f8fafc" font-size="34" font-family="Arial" font-weight="700">ESQUEMA DE MONTAGEM GERADO</text>
-    <text x="60" y="122" fill="#bfdbfe" font-size="24" font-family="Arial">${escapeXml(brand)} • ${escapeXml(model)} • ${escapeXml(engine)}</text>
 
-    <rect x="50" y="160" width="630" height="320" rx="22" fill="url(#card)" />
-    <text x="80" y="205" fill="#0f172a" font-size="28" font-family="Arial" font-weight="700">Bloco e parte inferior</text>
-    <rect x="110" y="250" width="420" height="120" rx="24" fill="#94a3b8" />
-    <circle cx="170" cy="310" r="38" fill="#334155" />
-    <circle cx="270" cy="310" r="38" fill="#334155" />
-    <circle cx="370" cy="310" r="38" fill="#334155" />
-    <circle cx="470" cy="310" r="38" fill="#334155" />
-    <rect x="135" y="282" width="360" height="56" rx="18" fill="#cbd5e1" />
-    <text x="80" y="410" fill="#0f172a" font-size="20" font-family="Arial">Torque-chave</text>
-    <foreignObject x="80" y="425" width="560" height="40">
-      <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:Arial;font-size:16px;color:#1e293b;">${escapeXml(
-        torqueLine || "Torque progressivo com conferência final e reaperto conforme boletim técnico."
-      )}</div>
-    </foreignObject>
+    <rect width="1800" height="1200" rx="28" fill="url(#bg)" />
+    <text x="60" y="80" fill="#f8fafc" font-size="40" font-family="Arial" font-weight="700">GUIA TÉCNICO DE MONTAGEM - IMAGEM JPG GERADA</text>
+    <text x="60" y="122" fill="#bfdbfe" font-size="28" font-family="Arial">${escapeXml(brand)} • ${escapeXml(model)} • ${escapeXml(engine)}</text>
 
-    <rect x="720" y="160" width="630" height="220" rx="22" fill="#e0f2fe" />
-    <text x="750" y="205" fill="#0f172a" font-size="28" font-family="Arial" font-weight="700">Montagem superior</text>
-    <text x="750" y="245" fill="#0f172a" font-size="18" font-family="Arial">Sequência sugerida: espiral do centro para fora</text>
-    <g fill="#0f766e">
-      <circle cx="810" cy="300" r="22"/><circle cx="870" cy="260" r="22"/><circle cx="930" cy="300" r="22"/>
-      <circle cx="990" cy="260" r="22"/><circle cx="1050" cy="300" r="22"/><circle cx="1110" cy="260" r="22"/>
-      <circle cx="1170" cy="300" r="22"/><circle cx="1230" cy="260" r="22"/>
-    </g>
-    <text x="750" y="350" fill="#0f172a" font-size="18" font-family="Arial">Cabeçote, juntas e válvulas devem ser fechados com controle angular.</text>
+    <rect x="50" y="160" width="820" height="460" rx="24" fill="url(#panelLight)" />
+    <text x="80" y="210" fill="#0f172a" font-size="30" font-family="Arial" font-weight="700">BLOCO E CONJUNTO INFERIOR</text>
+    <rect x="140" y="300" width="470" height="150" rx="30" fill="#93a4b8" />
+    <rect x="170" y="345" width="410" height="60" rx="18" fill="#dbe3ec" />
+    <circle cx="210" cy="375" r="42" fill="#334155" />
+    <circle cx="320" cy="375" r="42" fill="#334155" />
+    <circle cx="430" cy="375" r="42" fill="#334155" />
+    <circle cx="540" cy="375" r="42" fill="#334155" />
+    <rect x="650" y="250" width="160" height="250" rx="24" fill="#e2e8f0" stroke="#64748b" stroke-width="4" />
+    <text x="675" y="300" fill="#0f172a" font-size="20" font-family="Arial" font-weight="700">LEGENDA</text>
+    ${renderLines([
+      "1. Mancais principais",
+      "2. Bielas e capas",
+      "3. Folga axial",
+      "4. Aperto angular",
+      "5. Conferência final",
+    ], 675, 335, "#1e293b", 18)}
+    <text x="80" y="520" fill="#0f172a" font-size="22" font-family="Arial" font-weight="700">Pontos de inspeção</text>
+    ${renderLines(checklist, 90, 555, "#1e293b", 20)}
 
-    <rect x="720" y="410" width="630" height="260" rx="22" fill="#f8fafc" />
-    <text x="750" y="455" fill="#0f172a" font-size="28" font-family="Arial" font-weight="700">Checklist da IA</text>
-    <text x="770" y="505" fill="#1e293b" font-size="18" font-family="Arial">1. ${escapeXml(checklist[0] || "Inspeção inicial")}</text>
-    <text x="770" y="545" fill="#1e293b" font-size="18" font-family="Arial">2. ${escapeXml(checklist[1] || "Torque do cabeçote")}</text>
-    <text x="770" y="585" fill="#1e293b" font-size="18" font-family="Arial">3. ${escapeXml(checklist[2] || "Sincronismo")}</text>
-    <text x="770" y="625" fill="#1e293b" font-size="18" font-family="Arial">4. ${escapeXml(checklist[3] || "Reaperto final")}</text>
+    <rect x="900" y="160" width="850" height="300" rx="24" fill="#e0f2fe" />
+    <text x="930" y="210" fill="#0f172a" font-size="30" font-family="Arial" font-weight="700">MONTAGEM SUPERIOR E SINCRONISMO</text>
+    <circle cx="1080" cy="315" r="75" fill="#cbd5e1" stroke="#334155" stroke-width="8" />
+    <circle cx="1260" cy="315" r="75" fill="#cbd5e1" stroke="#334155" stroke-width="8" />
+    <circle cx="1170" cy="410" r="55" fill="#94a3b8" stroke="#334155" stroke-width="8" />
+    <path d="M1080 240 L1260 240 L1210 410 L1130 410 Z" fill="none" stroke="#0f766e" stroke-width="10" />
+    <text x="1380" y="270" fill="#0f172a" font-size="20" font-family="Arial">• Sequência: caracol do centro para fora</text>
+    <text x="1380" y="305" fill="#0f172a" font-size="20" font-family="Arial">• PMS no 1º cilindro</text>
+    <text x="1380" y="340" fill="#0f172a" font-size="20" font-family="Arial">• Trava de comando recomendada</text>
+    <text x="1380" y="375" fill="#0f172a" font-size="20" font-family="Arial">• Conferir vedação da junta</text>
 
-    <rect x="50" y="520" width="630" height="150" rx="22" fill="#fef3c7" />
-    <text x="80" y="565" fill="#78350f" font-size="26" font-family="Arial" font-weight="700">Observações críticas</text>
-    <text x="80" y="605" fill="#78350f" font-size="18" font-family="Arial">• Lubrificar roscas recomendadas e conferir planicidade</text>
-    <text x="80" y="635" fill="#78350f" font-size="18" font-family="Arial">• Trocar fixadores angulares quando exigido</text>
-    <text x="80" y="665" fill="#78350f" font-size="18" font-family="Arial">• Validar o chassi/VIN em API pública antes do fechamento final</text>
+    <rect x="900" y="490" width="850" height="320" rx="24" fill="#f8fafc" />
+    <text x="930" y="540" fill="#0f172a" font-size="30" font-family="Arial" font-weight="700">TORQUES E ETAPAS CRÍTICAS</text>
+    <rect x="940" y="570" width="250" height="180" rx="18" fill="#e2e8f0" />
+    <rect x="1210" y="570" width="250" height="180" rx="18" fill="#e2e8f0" />
+    <rect x="1480" y="570" width="230" height="180" rx="18" fill="#e2e8f0" />
+    ${renderLines(torqueSpecs.map((item) => `${item.component}`), 960, 610, "#0f172a", 18, 700)}
+    ${renderLines(torqueSpecs.map((item) => `${item.sequence}`), 1230, 610, "#334155", 17, 600)}
+    ${renderLines(torqueSpecs.map((item) => `${item.value}`), 1500, 610, "#0369a1", 17, 700)}
 
-    <text x="60" y="840" fill="#cbd5e1" font-size="16" font-family="Arial">Gerado automaticamente pelo Motor Schema AI • versão demonstrativa para consulta técnica</text>
+    <rect x="50" y="650" width="820" height="250" rx="24" fill="url(#panelWarn)" />
+    <text x="80" y="700" fill="#7c2d12" font-size="30" font-family="Arial" font-weight="700">OBSERVAÇÕES TÉCNICAS IMPORTANTES</text>
+    ${renderLines(noteLines, 90, 745, "#7c2d12", 21, 600)}
+    <text x="90" y="860" fill="#9a3412" font-size="19" font-family="Arial">A imagem foi sintetizada para consulta rápida com foco em montagem, reaperto e sincronismo.</text>
+
+    <rect x="50" y="930" width="1700" height="210" rx="24" fill="#082f49" />
+    <text x="80" y="980" fill="#e0f2fe" font-size="28" font-family="Arial" font-weight="700">RESUMO DA IA</text>
+    ${renderLines([
+      `Família: ${matched?.family || "Diesel pesado"}`,
+      `Aplicação: ${matched?.application || "Caminhões, ônibus e linha rodoviária"}`,
+      `Anos de referência: ${matched?.years || "Consulta técnica"}`,
+      "Foco do esquema: cabeçote, mancal, biela, sincronismo e regulagem final.",
+    ], 90, 1020, "#dbeafe", 21)}
+
+    <text x="1180" y="1110" fill="#93c5fd" font-size="16" font-family="Arial">Motor Schema AI • JPG técnico gerado automaticamente</text>
   </svg>`;
 
-  return new Response(svg, {
+  const imageBuffer = await sharp(Buffer.from(svg))
+    .jpeg({ quality: 92, mozjpeg: true })
+    .toBuffer();
+
+  return new Response(new Uint8Array(imageBuffer), {
     headers: {
-      "Content-Type": "image/svg+xml; charset=utf-8",
+      "Content-Type": "image/jpeg",
       ...(download
-        ? { "Content-Disposition": `attachment; filename="esquema-${brand}-${model}.svg"` }
+        ? { "Content-Disposition": `attachment; filename="esquema-${brand}-${engine}.jpg"` }
         : {}),
     },
   });
