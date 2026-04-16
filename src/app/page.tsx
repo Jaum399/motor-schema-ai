@@ -45,6 +45,8 @@ type SearchResponse = {
   suggestions: string[];
   publicData: {
     sourceLabel: string;
+    sourceList?: string[];
+    duckAnswer?: string | null;
     modelHints?: string[];
     wiki?: {
       title: string;
@@ -258,6 +260,14 @@ export default function Home() {
               >
                 Baixar JPG
               </a>
+              <a
+                href="https://www.canva.com/pt_br/"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-2xl border border-violet-400/40 px-5 py-3 font-semibold text-violet-100 hover:border-violet-300"
+              >
+                Editar no Canva
+              </a>
             </div>
 
             {error ? (
@@ -359,6 +369,14 @@ export default function Home() {
                       >
                         Aprovar e baixar JPG
                       </a>
+                      <a
+                        href="https://www.canva.com/pt_br/"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-xl border border-violet-300/40 px-3 py-2 text-sm font-semibold text-violet-100"
+                      >
+                        Ajustar no Canva
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -411,6 +429,16 @@ export default function Home() {
                   {result.publicData.modelHints?.length ? (
                     <p>
                       <strong className="text-white">Modelos relacionados:</strong> {result.publicData.modelHints.join(", ")}
+                    </p>
+                  ) : null}
+                  {result.publicData.duckAnswer ? (
+                    <p>
+                      <strong className="text-white">Resumo público extra:</strong> {result.publicData.duckAnswer}
+                    </p>
+                  ) : null}
+                  {result.publicData.sourceList?.length ? (
+                    <p>
+                      <strong className="text-white">Bases consultadas:</strong> {result.publicData.sourceList.join(", ")}
                     </p>
                   ) : null}
                   {result.aiBlueprint?.recommendedSequence?.length ? (
