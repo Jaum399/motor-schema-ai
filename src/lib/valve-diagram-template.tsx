@@ -29,26 +29,40 @@ export function createValveDiagramElement({
         height: 1500,
         display: "flex",
         flexDirection: "column",
-        background: "#dce4ea",
-        padding: 16,
-        gap: 18,
+        background: "linear-gradient(135deg, #eee8da 0%, #e7e3d7 55%, #d9e1e7 100%)",
+        padding: 18,
+        gap: 14,
         color: "#111827",
         fontFamily: "MTManual",
         boxSizing: "border-box",
+        border: "3px solid #1f2937",
       }}
     >
       <div
         style={{
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "space-between",
           alignItems: "center",
           border: "3px solid #111827",
           borderRadius: 16,
-          background: "#f8fafc",
-          padding: "16px 24px",
+          background: "#f8f5ee",
+          padding: "14px 20px",
         }}
       >
-        <div style={{ display: "flex", fontSize: 48, fontWeight: 800, textAlign: "center" }}>{title}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", fontSize: 18, fontWeight: 800, letterSpacing: 1 }}>MT DIESEL ESQUEMAS • FICHA TECNICA DE OFICINA</div>
+          <div style={{ display: "flex", fontSize: 48, fontWeight: 800, textAlign: "center" }}>{title}</div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+          <div style={{ display: "flex", fontSize: 16, fontWeight: 700 }}>PADRAO VISUAL DE MANUAL ORIGINAL</div>
+          <div style={{ display: "flex", fontSize: 16, fontWeight: 700 }}>REVISAO IA + REFERENCIA MECANICA</div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 12, border: "2px solid #475569", borderRadius: 12, background: "#edf2f5", padding: "8px 12px", fontSize: 16, fontWeight: 700 }}>
+        <div style={{ display: "flex" }}>CONDICAO: MOTOR FRIO</div>
+        <div style={{ display: "flex" }}>MEDICAO COM LAMINA CALIBRADA</div>
+        <div style={{ display: "flex" }}>BALANCO EM CRUZ</div>
       </div>
 
       <div style={{ display: "flex", gap: 18, flex: 1 }}>
@@ -122,30 +136,42 @@ export function createValveDiagramElement({
                   <div style={{ display: "flex", fontSize: 14, fontWeight: 800, color: "#334155" }}>REFERENCIA MECANICA GERADA PELO GEMINI API</div>
                 </div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <div key={`inj-${index}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                        <div style={{ display: "flex", width: 8, height: 24, background: "#5f6b75", borderRadius: 4 }} />
+                        <div style={{ display: "flex", width: 20, height: 14, borderRadius: 4, background: "#d1d9df", border: "2px solid #374151" }} />
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 260, height: 54, borderRadius: 12, background: "#d6dee4", border: "3px solid #374151" }} />
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: 360 }}>
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 72, height: 72, borderRadius: 999, background: "#dfe5ea", border: "4px solid #374151" }}>
+                      <div style={{ display: "flex", width: 40, height: 40, borderRadius: 999, background: "#97a4ae", border: "3px solid #374151" }} />
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: 240, height: 68, borderRadius: 12, background: "#b8c2ca", border: "3px solid #374151", padding: "0 12px" }}>
+                        {Array.from({ length: 6 }).map((_, index) => (
+                          <div key={`bolt-${index}`} style={{ display: "flex", width: 18, height: 18, borderRadius: 999, background: "#83939e", border: "2px solid #374151" }} />
+                        ))}
+                      </div>
+                      <div style={{ display: "flex", width: 190, height: 120, borderRadius: 18, background: "#c6cfd6", border: "3px solid #374151" }} />
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 56, height: 56, borderRadius: 999, background: "#dfe5ea", border: "4px solid #374151" }}>
+                      <div style={{ display: "flex", width: 24, height: 24, borderRadius: 999, background: "#97a4ae", border: "3px solid #374151" }} />
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: 280, height: 76, borderRadius: 12, background: "#d2dae0", border: "3px solid #374151", padding: "0 12px" }}>
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <div key={`lower-${index}`} style={{ display: "flex", width: 18, height: 18, borderRadius: 999, background: "#97a4ae", border: "2px solid #374151" }} />
+                    ))}
+                  </div>
                   <div style={{ display: "flex", gap: 10 }}>
-                    {Array.from({ length: 6 }).map((_, index) => (
-                      <div key={`t-${index}`} style={{ display: "flex", width: 20, height: 14, borderRadius: 4, background: "#c5d0d8", border: "2px solid #374151" }} />
-                    ))}
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 190, height: 56, borderRadius: 10, background: "#c7d0d8", border: "3px solid #374151" }} />
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: 240, height: 62, borderRadius: 10, background: "#b5bec6", border: "3px solid #374151", padding: "0 12px" }}>
-                    {Array.from({ length: 6 }).map((_, index) => (
-                      <div key={`h-${index}`} style={{ display: "flex", width: 18, height: 18, borderRadius: 999, background: "#8594a0", border: "2px solid #374151" }} />
-                    ))}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: 300 }}>
-                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 72, height: 72, borderRadius: 999, background: "#d9dfe5", border: "4px solid #374151" }}>
-                      <div style={{ display: "flex", width: 38, height: 38, borderRadius: 999, background: "#92a0ab", border: "3px solid #374151" }} />
-                    </div>
-                    <div style={{ display: "flex", width: 170, height: 180, borderRadius: 18, background: "#bcc6cf", border: "3px solid #374151" }} />
-                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: 56, height: 56, borderRadius: 999, background: "#d9dfe5", border: "4px solid #374151" }}>
-                      <div style={{ display: "flex", width: 24, height: 24, borderRadius: 999, background: "#92a0ab", border: "3px solid #374151" }} />
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: 220, height: 74, borderRadius: 12, background: "#c4ced6", border: "3px solid #374151", padding: "0 10px" }}>
-                    {Array.from({ length: 6 }).map((_, index) => (
-                      <div key={`r-${index}`} style={{ display: "flex", width: 16, height: 16, borderRadius: 999, background: "#9ca9b4", border: "2px solid #374151" }} />
+                    {["ADM", "ESC", "OLEO"].map((label) => (
+                      <div key={label} style={{ display: "flex", padding: "5px 10px", borderRadius: 999, border: "2px solid #374151", background: "#eef2f5", fontSize: 13, fontWeight: 800 }}>
+                        {label}
+                      </div>
                     ))}
                   </div>
                 </div>

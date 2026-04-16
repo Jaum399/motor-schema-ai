@@ -413,9 +413,10 @@ function renderAssemblySheet({
     </defs>
     <style>${fontCss}</style>
 
-    <rect width="2200" height="1500" rx="22" fill="#efefea" />
-    <text x="60" y="78" fill="#111827" font-size="56" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(title)}</text>
-    <text x="60" y="116" fill="#334155" font-size="24" font-family="DejaVu Sans, sans-serif" font-weight="500">${escapeXml(engine.toUpperCase())} - PADRAO VISUAL DE MANUAL TECNICO - PORTUGUES BRASIL</text>
+    <rect width="2200" height="1500" rx="22" fill="#ece7db" />
+    <rect x="20" y="18" width="2160" height="106" rx="16" fill="#f8f5ee" stroke="#1f2937" stroke-width="3" />
+    <text x="60" y="76" fill="#111827" font-size="54" font-family="DejaVu Sans, sans-serif" font-weight="700">${escapeXml(title)}</text>
+    <text x="60" y="110" fill="#334155" font-size="23" font-family="DejaVu Sans, sans-serif" font-weight="600">${escapeXml(engine.toUpperCase())} - ACABAMENTO DE MANUAL ORIGINAL - PORTUGUES BRASIL</text>
 
     <rect x="40" y="150" width="920" height="480" rx="18" fill="#f8fafc" stroke="#d1d5db" stroke-width="3" />
     <rect x="40" y="150" width="920" height="54" rx="18" fill="#bdebf0" />
@@ -424,27 +425,29 @@ function renderAssemblySheet({
     ${geminiIllustration ? `
       <rect x="72" y="268" width="620" height="290" rx="16" fill="#dbe4ea" stroke="#334155" stroke-width="2" />
       <image x="82" y="278" width="600" height="270" href="${geminiIllustration}" preserveAspectRatio="xMidYMid slice" />
-      <text x="84" y="585" fill="#0f172a" font-size="16" font-family="DejaVu Sans, sans-serif" font-weight="700">BASE MECANICA GERADA PELO GEMINI API</text>
+      <text x="84" y="585" fill="#0f172a" font-size="16" font-family="DejaVu Sans, sans-serif" font-weight="700">ILUSTRACAO TECNICA REFINADA VIA GEMINI</text>
     ` : ""}
 
-    <g transform="translate(85,270)">
-      <rect x="0" y="130" width="650" height="150" rx="12" fill="#98a5aa" />
-      <rect x="80" y="40" width="460" height="115" rx="20" fill="#dbe4ea" />
-      <circle cx="130" cy="100" r="34" fill="#334155" />
-      <circle cx="240" cy="100" r="34" fill="#334155" />
-      <circle cx="350" cy="100" r="34" fill="#334155" />
-      <circle cx="460" cy="100" r="34" fill="#334155" />
-      <circle cx="570" cy="100" r="34" fill="#334155" />
-      <line x1="130" y1="5" x2="130" y2="52" stroke="#c2410c" stroke-width="4" marker-end="url(#arrow)" />
-      <line x1="240" y1="5" x2="240" y2="52" stroke="#c2410c" stroke-width="4" marker-end="url(#arrow)" />
-      <line x1="350" y1="5" x2="350" y2="52" stroke="#c2410c" stroke-width="4" marker-end="url(#arrow)" />
-      <line x1="460" y1="5" x2="460" y2="52" stroke="#c2410c" stroke-width="4" marker-end="url(#arrow)" />
-      <line x1="570" y1="5" x2="570" y2="52" stroke="#c2410c" stroke-width="4" marker-end="url(#arrow)" />
-      <circle cx="130" cy="0" r="18" fill="#f59e0b" /><text x="124" y="6" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="600">1</text>
-      <circle cx="240" cy="0" r="18" fill="#f59e0b" /><text x="234" y="6" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="600">2</text>
-      <circle cx="350" cy="0" r="18" fill="#f59e0b" /><text x="344" y="6" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="600">3</text>
-      <circle cx="460" cy="0" r="18" fill="#f59e0b" /><text x="454" y="6" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="600">4</text>
-      <circle cx="570" cy="0" r="18" fill="#f59e0b" /><text x="564" y="6" fill="#374151" font-size="17" font-family="DejaVu Sans, sans-serif" font-weight="600">5</text>
+    <g transform="translate(78,252)">
+      <rect x="42" y="118" width="620" height="170" rx="18" fill="#99a7ad" stroke="#334155" stroke-width="3" />
+      <rect x="118" y="38" width="430" height="88" rx="18" fill="#dbe4ea" stroke="#334155" stroke-width="3" />
+      ${Array.from({ length: 6 }).map((_, index) => {
+        const x = 140 + index * 64;
+        return `<rect x="${x}" y="16" width="16" height="26" rx="6" fill="#94a3ad" stroke="#334155" stroke-width="2" />
+                <circle cx="${x + 8}" cy="67" r="14" fill="#7c8c97" stroke="#334155" stroke-width="2" />
+                <line x1="${x + 8}" y1="-2" x2="${x + 8}" y2="28" stroke="#c2410c" stroke-width="3" marker-end="url(#arrow)" />
+                <circle cx="${x + 8}" cy="-6" r="14" fill="#f59e0b" /><text x="${x + 3}" y="0" fill="#374151" font-size="15" font-family="DejaVu Sans, sans-serif" font-weight="700">${index + 1}</text>`;
+      }).join("")}
+      <rect x="150" y="140" width="380" height="68" rx="12" fill="#bcc8cf" stroke="#334155" stroke-width="3" />
+      ${Array.from({ length: 6 }).map((_, index) => `<circle cx="${175 + index * 58}" cy="174" r="12" fill="#8796a1" stroke="#334155" stroke-width="2" />`).join("")}
+      <circle cx="88" cy="206" r="58" fill="#d7dee4" stroke="#334155" stroke-width="4" />
+      <circle cx="88" cy="206" r="28" fill="#94a3ad" stroke="#334155" stroke-width="3" />
+      <circle cx="595" cy="192" r="48" fill="#d7dee4" stroke="#334155" stroke-width="4" />
+      <circle cx="595" cy="192" r="22" fill="#94a3ad" stroke="#334155" stroke-width="3" />
+      <path d="M530 145 C585 120, 620 115, 650 140" fill="none" stroke="#475569" stroke-width="5" />
+      <path d="M150 236 C210 255, 450 255, 525 228" fill="none" stroke="#475569" stroke-width="6" />
+      <rect x="250" y="216" width="180" height="110" rx="18" fill="#c8d1d7" stroke="#334155" stroke-width="3" />
+      <text x="254" y="352" fill="#111827" font-size="16" font-family="DejaVu Sans, sans-serif" font-weight="700">CORPO PRINCIPAL • VISTA MECANICA</text>
     </g>
 
     <rect x="740" y="285" width="190" height="215" rx="12" fill="#fff7ed" stroke="#d6d3d1" stroke-width="2" />

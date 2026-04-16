@@ -99,7 +99,7 @@ export function buildFallbackBlueprint({
     ],
     layoutHint,
     componentFocus,
-    imagePrompt: `Crie uma ilustracao tecnica de manual de oficina para ${engineName}, com estilo realista, vista mecanica detalhada, etiquetas em portugues brasil, blocos limpos, foco em ${componentFocus.join(", ")} e aparencia parecida com folha de referencia de mecanica diesel.`,
+    imagePrompt: `Crie uma ilustracao tecnica hiper-realista de manual de oficina para ${engineName}, com acabamento igual ao manual original escaneado, vista mecanica isometrica e ortografica, metais escovados, parafusos, galerias de oleo, dutos, sombras suaves, etiquetas numeradas em portugues brasil, setas de torque e folha tecnica limpa. Sem cartum. Foco em ${componentFocus.join(", ")}.`,
   };
 }
 
@@ -127,10 +127,10 @@ export async function generateAiBlueprint({
   }
 
   const prompt = `Atue como especialista em motores diesel pesados e designer de manuais de oficina.
-Responda sempre em portugues brasil, com linguagem tecnica e objetiva.
+Responda sempre em portugues brasil, com linguagem tecnica, objetiva e visual de oficina.
 
-Referencia visual principal: esquema OM352 de regulagem de valvulas, com blocos claros, mais detalhes mecanicos, leitura de oficina e titulos fortes.
-Agora adapte esse padrao ao motor consultado.
+Referencia visual principal: folha de manual OM352 de regulagem de valvulas, com acabamento industrial limpo, textura de impressao tecnica, setas, cotas, blocos claros e componentes mecanicos reconheciveis.
+Agora adapte esse padrao ao motor consultado com aspecto mais realista e fiel ao manual original.
 
 Marca: ${brand || record?.brand || "nao informado"}
 Motor: ${engine || record?.engineCode || record?.model || "nao informado"}
@@ -149,52 +149,58 @@ headline, narrative, warnings, detailLines, recommendedSequence, layoutHint, com
 Regras:
 - warnings, detailLines, recommendedSequence e componentFocus com exatamente 4 itens
 - layoutHint deve ser apenas: valve, inline, v-engine ou gearbox
-- imagePrompt deve pedir uma ilustracao mecanica realista em estilo de manual tecnico diesel.`;
+- imagePrompt deve pedir uma ilustracao mecanica hiper-realista, com acabamento igual manual original, metais, parafusos, tubulacoes, callouts numerados e pagina de oficina diesel, sem aspecto cartum.`;
 
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.35,
-            responseMimeType: "application/json",
+  const models = ["gemini-2.0-flash", "gemini-2.0-flash-lite"];
+
+  for (const modelName of models) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        }),
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.35,
+              responseMimeType: "application/json",
+            },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        continue;
       }
-    );
 
-    if (!response.ok) {
-      return fallback;
+      const payload = await response.json();
+      const rawText = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) {
+        continue;
+      }
+
+      const parsed = JSON.parse(rawText);
+
+      return {
+        provider: "gemini",
+        headline: safeText(parsed.headline, fallback.headline),
+        narrative: safeText(parsed.narrative, fallback.narrative),
+        warnings: safeStringArray(parsed.warnings, fallback.warnings, 4),
+        detailLines: safeStringArray(parsed.detailLines, fallback.detailLines, 4),
+        recommendedSequence: safeStringArray(parsed.recommendedSequence, fallback.recommendedSequence, 4),
+        layoutHint: normalizeLayoutHint(parsed.layoutHint, fallback.layoutHint),
+        componentFocus: safeStringArray(parsed.componentFocus, fallback.componentFocus, 4),
+        imagePrompt: safeText(parsed.imagePrompt, fallback.imagePrompt),
+      };
+    } catch {
+      continue;
     }
-
-    const payload = await response.json();
-    const rawText = payload?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawText) {
-      return fallback;
-    }
-
-    const parsed = JSON.parse(rawText);
-
-    return {
-      provider: "gemini",
-      headline: safeText(parsed.headline, fallback.headline),
-      narrative: safeText(parsed.narrative, fallback.narrative),
-      warnings: safeStringArray(parsed.warnings, fallback.warnings, 4),
-      detailLines: safeStringArray(parsed.detailLines, fallback.detailLines, 4),
-      recommendedSequence: safeStringArray(parsed.recommendedSequence, fallback.recommendedSequence, 4),
-      layoutHint: normalizeLayoutHint(parsed.layoutHint, fallback.layoutHint),
-      componentFocus: safeStringArray(parsed.componentFocus, fallback.componentFocus, 4),
-      imagePrompt: safeText(parsed.imagePrompt, fallback.imagePrompt),
-    };
-  } catch {
-    return fallback;
   }
+
+  return fallback;
 }
 
 export async function generateGeminiMechanicalBase({
@@ -214,7 +220,7 @@ export async function generateGeminiMechanicalBase({
     return null;
   }
 
-  const prompt = `${blueprint.imagePrompt}\nMarca: ${brand}\nModelo: ${model}\nMotor: ${engine}\nSem fundo artistico. Formato de pagina tecnica, desenho mecanico realista, limpo e muito explicativo.`;
+  const prompt = `${blueprint.imagePrompt}\nMarca: ${brand}\nModelo: ${model}\nMotor: ${engine}\nGerar como pagina de manual tecnico original de oficina, ultra detalhada, com tubulacoes, parafusos, juntas, etiquetas numeradas, sombras metalicas suaves, recortes limpos e aparencia fototecnica impressa. Sem fundo artistico, sem pessoas e sem estilo infantil.`;
   const models = [
     "gemini-2.0-flash-preview-image-generation",
     "gemini-2.0-flash-exp-image-generation",
