@@ -87,10 +87,10 @@ Gere um JSON técnico para um esquema visual mecânico detalhado.
 Marca: ${brand || record?.brand || "não informado"}
 Motor: ${engine || record?.engineCode || record?.model || "não informado"}
 Base treinada com histórico técnico do chat:\n${knowledgeContext || "Sem histórico adicional"}
-Objetivo: criar um infográfico técnico semelhante a manual de torque e montagem, sem inventar valores fora da base disponível.
+Objetivo: criar conteúdo para um infográfico no padrão de manual técnico automotivo: títulos em caixa alta, blocos separados, torques por etapa, medições, sincronismo e observações críticas.
+Nunca invente valores fora da base disponível. Se faltar valor exato, descreva o procedimento de forma técnica e segura.
 Retorne estritamente JSON com as chaves: headline, narrative, warnings, detailLines, recommendedSequence.
-Cada array deve ter exatamente 4 itens curtos, objetivos e técnicos.`;
-
+Cada array deve ter exatamente 4 itens curtos, objetivos, técnicos e prontos para serem exibidos em quadros de manual.`;
   try {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,

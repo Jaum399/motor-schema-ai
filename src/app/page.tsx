@@ -75,6 +75,20 @@ const presets: SearchForm[] = [
 
 const initialFilters: SearchForm = presets[0];
 
+async function parseJsonSafe(response: Response) {
+  const raw = await response.text();
+
+  if (!raw) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
+}
+
 export default function Home() {
   const [filters, setFilters] = useState<SearchForm>(initialFilters);
   const [result, setResult] = useState<SearchResponse | null>(null);
@@ -100,7 +114,7 @@ export default function Home() {
   async function loadHistory() {
     try {
       const response = await fetch("/api/history", { cache: "no-store" });
-      const data = await response.json();
+      const data = await parseJsonSafe(response);
       setHistory(data.items || []);
     } catch {
       setHistory([]);
@@ -122,7 +136,7 @@ export default function Home() {
       if (forcedFilters.model) params.set("model", forcedFilters.model);
 
       const response = await fetch(`/api/search?${params.toString()}`, { cache: "no-store" });
-      const data = await response.json();
+      const data = await parseJsonSafe(response);
 
       if (!response.ok) {
         throw new Error(data?.error || "Falha ao consultar o esquema.");
@@ -149,7 +163,7 @@ export default function Home() {
       if (filters.model) params.set("model", filters.model);
 
       const response = await fetch(`/api/generate-ai?${params.toString()}`, { cache: "no-store" });
-      const data = await response.json();
+      const data = await parseJsonSafe(response);
 
       if (!response.ok) {
         throw new Error(data?.error || "Falha ao gerar o esquema com IA.");
