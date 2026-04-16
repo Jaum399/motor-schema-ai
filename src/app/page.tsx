@@ -80,6 +80,7 @@ export default function Home() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [showAiPreview, setShowAiPreview] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -126,6 +127,7 @@ export default function Home() {
       }
 
       setResult(data);
+      setShowAiPreview(false);
       await loadHistory();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Não foi possível processar sua busca agora.");
@@ -152,6 +154,7 @@ export default function Home() {
       }
 
       setResult(data);
+      setShowAiPreview(true);
       await loadHistory();
     } catch (err) {
       setError(err instanceof Error ? err.message : "A IA não conseguiu gerar o esquema agora.");
@@ -332,6 +335,34 @@ export default function Home() {
               <div className="mt-4 rounded-2xl bg-cyan-500/10 p-4 text-sm text-cyan-50">
                 {result.aiSummary}
               </div>
+
+              {showAiPreview ? (
+                <div className="mt-4 rounded-2xl border border-violet-400/30 bg-violet-500/10 p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-violet-100">Pré-visualização automática gerada por IA</p>
+                      <p className="text-sm text-violet-200">Confirme se o esquema está de acordo antes de baixar.</p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowAiPreview(false)}
+                        className="rounded-xl border border-violet-300/40 px-3 py-2 text-sm font-semibold text-violet-100"
+                      >
+                        Confirmar visualização
+                      </button>
+                      <a
+                        href={result?.schemaImageUrl ? `${result.schemaImageUrl}&download=1` : "#"}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-xl bg-violet-500 px-3 py-2 text-sm font-semibold text-white"
+                      >
+                        Aprovar e baixar JPG
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="space-y-6">
