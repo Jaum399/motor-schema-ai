@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Motor Schema AI
 
-## Getting Started
+Sistema em React + Next.js para pesquisar esquemas de montagem de motores diesel por marca, modelo, código do motor e chassi/VIN.
 
-First, run the development server:
+## Recursos entregues
+
+- Busca inteligente por marca, modelo, motor e chassi
+- Consumo de APIs públicas para enriquecer a consulta
+- Geração automática de imagem SVG com esquema técnico
+- Histórico de pesquisas com suporte a MongoDB Atlas
+- Estrutura preparada para deploy na Vercel e versionamento no GitHub
+
+## Executar localmente
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra http://localhost:3000 no navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variáveis de ambiente
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copie o arquivo de exemplo:
 
-## Learn More
+```bash
+copy .env.example .env.local
+```
 
-To learn more about Next.js, take a look at the following resources:
+Depois preencha os dados do MongoDB Atlas.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Publicação
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### GitHub
 
-## Deploy on Vercel
+```bash
+git add .
+git commit -m "feat: motor schema ai"
+git branch -M main
+git remote add origin URL_DO_REPOSITORIO
+git push -u origin main
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+vercel
+vercel --prod
+```
+
+### MongoDB Atlas
+
+1. Criar cluster
+2. Liberar acesso de rede
+3. Adicionar MONGODB_URI e MONGODB_DB
