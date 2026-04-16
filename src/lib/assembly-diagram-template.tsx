@@ -117,34 +117,44 @@ export function createAssemblyDiagramElement({
             <div style={{ display: "flex", fontSize: 18, fontWeight: 900 }}>{isGearbox ? "ENGRENAGENS E ALOJAMENTOS" : "BRONZINAS DE MANCAL (CAPA)"}</div>
             <div style={{ display: "flex", gap: 12, alignItems: "stretch", flex: 1 }}>
               <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "0 20px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "0 22px" }}>
                   {Array.from({ length: isVEngine ? 8 : 6 }).map((_, index) => (
                     <div key={`arr-${index}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
                       <div style={{ display: "flex", width: 28, height: 28, borderRadius: 999, background: "#f0a053", border: "2px solid #8a5115", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 900 }}>{index + 1}</div>
-                      <div style={{ display: "flex", width: 3, height: 26, background: "#000" }} />
-                      <div style={{ width: 0, height: 0, borderLeft: "8px solid transparent", borderRight: "8px solid transparent", borderTop: "16px solid #ef8a28" }} />
+                      <div style={{ display: "flex", width: 3, height: 22, background: "#000" }} />
+                      <div style={{ width: 0, height: 0, borderLeft: "8px solid transparent", borderRight: "8px solid transparent", borderTop: "14px solid #ef8a28" }} />
                     </div>
                   ))}
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ display: "flex", width: 24, height: 24, borderRadius: 999, border: "4px solid #516170", background: "#dbe2e7" }} />
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
+                  <div style={{ display: "flex", width: 22, height: 22, borderRadius: 999, border: "4px solid #516170", background: "#dbe2e7", marginTop: 52 }} />
                   {Array.from({ length: isVEngine ? 8 : 6 }).map((_, index) => (
-                    <div key={`main-${index}`} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <div style={{ display: "flex", width: 16, height: 74, borderRadius: 8, background: "#50616d", border: "2px solid #29323a" }} />
-                      <div style={{ display: "flex", width: 28, height: 98, borderRadius: 14, background: "#b7c2ca", border: "3px solid #29323a" }} />
+                    <div key={`main-${index}`} style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <div style={{ display: "flex", width: 14, height: 66, borderRadius: 8, background: "#4f5c67", border: "2px solid #29323a", marginTop: 12 }} />
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                        <div style={{ display: "flex", width: 24, height: 78, borderRadius: 14, background: "#bcc6cd", border: "3px solid #29323a" }} />
+                        <div style={{ display: "flex", width: 18, height: 18, borderRadius: 999, background: "#7e8d97", border: "2px solid #29323a" }} />
+                      </div>
                     </div>
                   ))}
-                  <div style={{ display: "flex", width: 24, height: 24, borderRadius: 999, border: "4px solid #516170", background: "#dbe2e7" }} />
+                  <div style={{ display: "flex", width: 22, height: 22, borderRadius: 999, border: "4px solid #516170", background: "#dbe2e7", marginTop: 52 }} />
                 </div>
 
-                <div style={{ display: "flex", width: "100%", height: 120, borderRadius: 10, background: "#98a6ae", border: "3px solid #29323a", justifyContent: "space-around", alignItems: "center" }}>
-                  {Array.from({ length: isVEngine ? 8 : 6 }).map((_, index) => (
-                    <div key={`bolt-${index}`} style={{ display: "flex", width: 18, height: 18, borderRadius: 999, background: "#83919b", border: "2px solid #29323a" }} />
-                  ))}
+                <div style={{ display: "flex", width: "100%", height: 122, borderRadius: 10, background: "#99a6ae", border: "3px solid #29323a", justifyContent: "space-around", alignItems: "center", position: "relative" }}>
+                  <div style={{ display: "flex", position: "absolute", left: 16, right: 16, top: 20, justifyContent: "space-around" }}>
+                    {Array.from({ length: isVEngine ? 8 : 6 }).map((_, index) => (
+                      <div key={`cap-${index}`} style={{ display: "flex", width: 18, height: 18, borderRadius: 999, background: "#83919b", border: "2px solid #29323a" }} />
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", position: "absolute", left: 16, right: 16, bottom: 14, justifyContent: "space-between" }}>
+                    {Array.from({ length: 10 }).map((_, index) => (
+                      <div key={`rib-${index}`} style={{ display: "flex", width: 8, height: 46, borderRadius: 5, background: "#75848f" }} />
+                    ))}
+                  </div>
                 </div>
 
-                <div style={{ display: "flex", fontSize: 14, fontWeight: 800, color: "#475569" }}>SEQUENCIA DE APERTO E VISTA DA PARTE INFERIOR DO CONJUNTO</div>
+                <div style={{ display: "flex", fontSize: 14, fontWeight: 800, color: "#475569" }}>VISTA DA ARVORE, MANCAL, BANCADA E ALOJAMENTO INFERIOR</div>
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", width: 320, gap: 8 }}>
@@ -176,14 +186,15 @@ export function createAssemblyDiagramElement({
             <div style={{ display: "flex", flexDirection: "column", flex: 1, border: "2px solid #c7ced4", borderRadius: 12, background: "#efefef", padding: 10, gap: 8 }}>
               {headerBar(isGearbox ? "SINCRONIZADORES" : "BIELAS (CAPA FRATURADA)")}
               <div style={{ display: "flex", gap: 10, alignItems: "center", justifyContent: "space-between", flex: 1 }}>
-                <div style={{ display: "flex", width: 72, height: 72, borderRadius: 999, border: "6px solid #3d4756" }} />
-                <div style={{ display: "flex", width: 68, height: 164, borderRadius: 22, background: "#d5dce3", border: "5px solid #3d4756", transform: "rotate(30deg)" }} />
-                <div style={{ display: "flex", width: 36, height: 36, borderRadius: 999, border: "6px solid #3d4756" }} />
+                <div style={{ display: "flex", width: 76, height: 76, borderRadius: 999, border: "6px solid #3d4756", position: "relative" }}>
+                  <div style={{ display: "flex", position: "absolute", inset: 12, borderRadius: 999, border: "3px solid #c28f52" }} />
+                </div>
+                <div style={{ display: "flex", width: 72, height: 172, borderRadius: 22, background: "#d5dce3", border: "5px solid #3d4756", transform: "rotate(30deg)", position: "relative" }}>
+                  <div style={{ display: "flex", position: "absolute", left: 22, top: 12, width: 24, height: 52, borderRadius: 10, border: "3px solid #8a5115" }} />
+                </div>
+                <div style={{ display: "flex", width: 40, height: 40, borderRadius: 999, border: "6px solid #3d4756" }} />
               </div>
-              <div style={{ display: "flex", fontSize: 14, fontWeight: 800, color: "#7c2d12" }}>{noteLines[0] || "ORIENTACAO E ENCAIXE DEVEM SER CONFERIDOS"}</div>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", flex: 1.15, border: "2px solid #c7ced4", borderRadius: 12, background: "#efefef", padding: 10, gap: 8 }}>
+              <div style={{ display: "flex", fontSize: 14, fontWeight: 800, color: "#111827" }}>CONEXAO TIPO FRATURADA • ENCAIXE UNICO</div>
               {headerBar(isGearbox ? "DADOS E TOLERANCIAS" : "ESPECIFICACOES DA BIELA")}
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {specRows.map((item, index) => (
@@ -212,11 +223,17 @@ export function createAssemblyDiagramElement({
             {headerBar(isGearbox ? "SINCRONISMO" : "SINCRONISMO E REGULAGEM")}
             <div style={{ display: "flex", fontSize: 17, fontWeight: 900 }}>{isGearbox ? "ACOPLAMENTO DE EIXOS" : "SINCRONISMO DO COMANDO"}</div>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
-              <div style={{ display: "flex", position: "relative", width: 300, height: 210, alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ display: "flex", width: 94, height: 94, borderRadius: 999, border: "5px solid #4b5563" }} />
-                <div style={{ display: "flex", width: 94, height: 94, borderRadius: 999, border: "5px solid #4b5563" }} />
-                <div style={{ display: "flex", position: "absolute", left: 106, bottom: 4, width: 66, height: 66, borderRadius: 999, background: "#94a3b8", border: "4px solid #475569" }} />
-                <div style={{ display: "flex", position: "absolute", left: 50, top: 28, width: 200, height: 120, borderLeft: "5px solid #0f766e", borderRight: "5px solid #0f766e", borderTop: "5px solid #0f766e", borderBottom: "5px solid transparent", borderRadius: 18 }} />
+              <div style={{ display: "flex", position: "relative", width: 320, height: 240, alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", width: 104, height: 104, borderRadius: 999, border: "5px solid #4b5563", justifyContent: "center", alignItems: "center" }}>
+                  <div style={{ display: "flex", width: 34, height: 34, borderRadius: 999, border: "3px solid #4b5563" }} />
+                </div>
+                <div style={{ display: "flex", width: 104, height: 104, borderRadius: 999, border: "5px solid #4b5563", justifyContent: "center", alignItems: "center" }}>
+                  <div style={{ display: "flex", width: 34, height: 34, borderRadius: 999, border: "3px solid #4b5563" }} />
+                </div>
+                <div style={{ display: "flex", position: "absolute", left: 112, bottom: 8, width: 74, height: 74, borderRadius: 999, background: "#94a3b8", border: "4px solid #475569" }} />
+                <div style={{ display: "flex", position: "absolute", left: 52, top: 42, width: 216, height: 126, borderLeft: "5px solid #0f766e", borderRight: "5px solid #0f766e", borderTop: "5px solid #0f766e", borderBottom: "5px solid transparent", borderRadius: 18 }} />
+                <div style={{ display: "flex", position: "absolute", left: 18, bottom: 24, width: 52, height: 8, background: "#374151" }} />
+                <div style={{ display: "flex", position: "absolute", right: 18, bottom: 24, width: 52, height: 8, background: "#374151" }} />
               </div>
             </div>
             {regulationLines.slice(0, 3).map((item) => (
@@ -229,12 +246,12 @@ export function createAssemblyDiagramElement({
           <div style={{ display: "flex", flexDirection: "column", border: "2px solid #c7ced4", borderRadius: 12, background: "#efefef", padding: 10, gap: 8, flex: 1 }}>
             {headerBar(isGearbox ? "ESPECIFICACOES ADICIONAIS" : "ESPECIFICACOES ADICIONAIS DO CABECOTE")}
             <div style={{ display: "flex", gap: 14, flex: 1 }}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, width: 220 }}>
-                <div style={{ display: "flex", width: 94, height: 72, background: "#bcc8cf", border: "3px solid #475569", borderRadius: 6 }} />
-                <div style={{ display: "flex", width: 150, height: 56, background: "#d9e2e8", border: "3px solid #475569", clipPath: "polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%)" }} />
-                <div style={{ display: "flex", width: 56, height: 110, background: "#e9b384" }} />
-                <div style={{ display: "flex", width: 94, height: 112, background: "#bcc8cf", border: "3px solid #475569", borderRadius: 6, alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ display: "flex", width: 20, height: 20, borderRadius: 999, background: "#94a3b8", border: "2px solid #475569" }} />
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, width: 240 }}>
+                <div style={{ display: "flex", width: 112, height: 64, background: "#bcc8cf", border: "3px solid #475569", borderRadius: 6 }} />
+                <div style={{ display: "flex", width: 160, height: 60, background: "#d9e2e8", border: "3px solid #475569", transform: "skew(-20deg)" }} />
+                <div style={{ display: "flex", width: 58, height: 112, background: "#e9b384" }} />
+                <div style={{ display: "flex", width: 100, height: 116, background: "#bcc8cf", border: "3px solid #475569", borderRadius: 6, alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ display: "flex", width: 18, height: 18, borderRadius: 999, background: "#94a3b8", border: "2px solid #475569" }} />
                 </div>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1, justifyContent: "center" }}>
