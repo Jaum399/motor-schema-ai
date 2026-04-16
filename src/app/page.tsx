@@ -32,6 +32,13 @@ type HistoryItem = {
 
 type SearchResponse = {
   aiSummary: string;
+  aiProvider?: string;
+  aiBlueprint?: {
+    headline: string;
+    warnings: string[];
+    detailLines: string[];
+    recommendedSequence: string[];
+  };
   generatedAt: string;
   schemaImageUrl: string;
   storageMode: "mongodb" | "demo";
@@ -70,6 +77,7 @@ export default function Home() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -121,6 +129,32 @@ export default function Home() {
       setError(err instanceof Error ? err.message : "Não foi possível processar sua busca agora.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleGenerateWithAI() {
+    setAiLoading(true);
+    setError("");
+
+    try {
+      const params = new URLSearchParams();
+      if (filters.brand) params.set("brand", filters.brand);
+      if (filters.engine) params.set("engine", filters.engine);
+      if (filters.model) params.set("model", filters.model);
+
+      const response = await fetch(`/api/generate-ai?${params.toString()}`, { cache: "no-store" });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Falha ao gerar o esquema com IA.");
+      }
+
+      setResult(data);
+      await loadHistory();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "A IA não conseguiu gerar o esquema agora.");
+    } finally {
+      setAiLoading(false);
     }
   }
 
@@ -204,6 +238,13 @@ export default function Home() {
               >
                 {loading ? "Buscando..." : "Gerar imagem JPG"}
               </button>
+              <button
+                type="button"
+                onClick={handleGenerateWithAI}
+                className="rounded-2xl bg-violet-500 px-5 py-3 font-semibold text-white hover:bg-violet-400"
+              >
+                {aiLoading ? "IA gerando..." : "Gerar por IA"}
+              </button>
               <a
                 href={result?.schemaImageUrl ? `${result.schemaImageUrl}&download=1` : "#"}
                 target="_blank"
@@ -262,6 +303,11 @@ export default function Home() {
                 <div>
                   <h2 className="text-2xl font-bold">Imagem técnica em JPG</h2>
                   <p className="text-sm text-slate-400">Montada automaticamente com quadro detalhado de montagem.</p>
+                  {result?.aiProvider ? (
+                    <span className="mt-2 inline-flex rounded-full bg-violet-500/15 px-3 py-1 text-xs font-semibold text-violet-200">
+                      IA ativa: {result.aiProvider === "gemini" ? "Gemini" : "Assistente local"}
+                    </span>
+                  ) : null}
                 </div>
                 {mainResult ? (
                   <button
@@ -318,15 +364,30 @@ export default function Home() {
               </div>
 
               <div className="rounded-3xl border border-slate-800 bg-slate-900 p-5 shadow-xl">
-                <h3 className="text-xl font-bold">Dados públicos</h3>
+                <h3 className="text-xl font-bold">Painel da IA</h3>
                 <div className="mt-3 space-y-3 text-sm text-slate-300">
                   <p>
                     <strong className="text-white">Fonte:</strong> {result.publicData.sourceLabel}
                   </p>
+                  {result.aiBlueprint?.headline ? (
+                    <p>
+                      <strong className="text-white">Análise:</strong> {result.aiBlueprint.headline}
+                    </p>
+                  ) : null}
                   {result.publicData.modelHints?.length ? (
                     <p>
                       <strong className="text-white">Modelos relacionados:</strong> {result.publicData.modelHints.join(", ")}
                     </p>
+                  ) : null}
+                  {result.aiBlueprint?.recommendedSequence?.length ? (
+                    <div>
+                      <p className="mb-2 font-semibold text-white">Sequência sugerida</p>
+                      <ul className="space-y-1">
+                        {result.aiBlueprint.recommendedSequence.map((step) => (
+                          <li key={step}>• {step}</li>
+                        ))}
+                      </ul>
+                    </div>
                   ) : null}
                 </div>
               </div>

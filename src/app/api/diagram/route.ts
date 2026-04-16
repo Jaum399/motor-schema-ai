@@ -28,6 +28,7 @@ export async function GET(request: Request) {
   const model = searchParams.get("model") || "Esquema técnico";
   const engine = searchParams.get("engine") || "Diesel";
   const download = searchParams.get("download") === "1";
+  const aiMode = searchParams.get("mode") === "ai";
 
   const matched = getEngineById(id);
   const checklist = (matched?.checklist || [
@@ -67,11 +68,11 @@ export async function GET(request: Request) {
     </defs>
 
     <rect width="1800" height="1200" rx="28" fill="url(#bg)" />
-    <text x="60" y="80" fill="#f8fafc" font-size="40" font-family="Arial" font-weight="700">GUIA TÉCNICO DE MONTAGEM - IMAGEM JPG GERADA</text>
+    <text x="60" y="80" fill="#f8fafc" font-size="40" font-family="Arial" font-weight="700">${aiMode ? "GUIA TÉCNICO DE MONTAGEM GERADO POR IA" : "GUIA TÉCNICO DE MONTAGEM E TORQUES"}</text>
     <text x="60" y="122" fill="#bfdbfe" font-size="28" font-family="Arial">${escapeXml(brand)} • ${escapeXml(model)} • ${escapeXml(engine)}</text>
 
     <rect x="50" y="160" width="820" height="460" rx="24" fill="url(#panelLight)" />
-    <text x="80" y="210" fill="#0f172a" font-size="30" font-family="Arial" font-weight="700">BLOCO E CONJUNTO INFERIOR</text>
+    <text x="80" y="210" fill="#0f172a" font-size="30" font-family="Arial" font-weight="700">BLOCO E PARTE INFERIOR</text>
     <rect x="140" y="300" width="470" height="150" rx="30" fill="#93a4b8" />
     <rect x="170" y="345" width="410" height="60" rx="18" fill="#dbe3ec" />
     <circle cx="210" cy="375" r="42" fill="#334155" />
@@ -91,7 +92,7 @@ export async function GET(request: Request) {
     ${renderLines(checklist, 90, 555, "#1e293b", 20)}
 
     <rect x="900" y="160" width="850" height="300" rx="24" fill="#e0f2fe" />
-    <text x="930" y="210" fill="#0f172a" font-size="30" font-family="Arial" font-weight="700">MONTAGEM SUPERIOR E SINCRONISMO</text>
+    <text x="930" y="210" fill="#0f172a" font-size="30" font-family="Arial" font-weight="700">MONTAGEM SUPERIOR</text>
     <circle cx="1080" cy="315" r="75" fill="#cbd5e1" stroke="#334155" stroke-width="8" />
     <circle cx="1260" cy="315" r="75" fill="#cbd5e1" stroke="#334155" stroke-width="8" />
     <circle cx="1170" cy="410" r="55" fill="#94a3b8" stroke="#334155" stroke-width="8" />
@@ -102,7 +103,7 @@ export async function GET(request: Request) {
     <text x="1380" y="375" fill="#0f172a" font-size="20" font-family="Arial">• Conferir vedação da junta</text>
 
     <rect x="900" y="490" width="850" height="320" rx="24" fill="#f8fafc" />
-    <text x="930" y="540" fill="#0f172a" font-size="30" font-family="Arial" font-weight="700">TORQUES E ETAPAS CRÍTICAS</text>
+    <text x="930" y="540" fill="#0f172a" font-size="30" font-family="Arial" font-weight="700">SINCRONISMO E REGULAGEM</text>
     <rect x="940" y="570" width="250" height="180" rx="18" fill="#e2e8f0" />
     <rect x="1210" y="570" width="250" height="180" rx="18" fill="#e2e8f0" />
     <rect x="1480" y="570" width="230" height="180" rx="18" fill="#e2e8f0" />
@@ -111,7 +112,7 @@ export async function GET(request: Request) {
     ${renderLines(torqueSpecs.map((item) => `${item.value}`), 1500, 610, "#0369a1", 17, 700)}
 
     <rect x="50" y="650" width="820" height="250" rx="24" fill="url(#panelWarn)" />
-    <text x="80" y="700" fill="#7c2d12" font-size="30" font-family="Arial" font-weight="700">OBSERVAÇÕES TÉCNICAS IMPORTANTES</text>
+    <text x="80" y="700" fill="#7c2d12" font-size="30" font-family="Arial" font-weight="700">ESPECIFICAÇÕES ADICIONAIS DO CABEÇOTE</text>
     ${renderLines(noteLines, 90, 745, "#7c2d12", 21, 600)}
     <text x="90" y="860" fill="#9a3412" font-size="19" font-family="Arial">A imagem foi sintetizada para consulta rápida com foco em montagem, reaperto e sincronismo.</text>
 

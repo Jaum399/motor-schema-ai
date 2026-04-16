@@ -4,9 +4,10 @@ Sistema em React + Next.js para pesquisar esquemas de montagem de motores diesel
 
 ## Recursos entregues
 
-- Busca inteligente por marca, modelo, motor e chassi
+- Busca inteligente por marca e motor
+- Botão Gerar por IA com suporte a Gemini
 - Consumo de APIs públicas para enriquecer a consulta
-- Geração automática de imagem SVG com esquema técnico
+- Geração automática de imagem JPG com esquema técnico
 - Histórico de pesquisas com suporte a MongoDB Atlas
 - Estrutura preparada para deploy na Vercel e versionamento no GitHub
 
@@ -27,7 +28,7 @@ Copie o arquivo de exemplo:
 copy .env.example .env.local
 ```
 
-Depois preencha os dados do MongoDB Atlas.
+Depois preencha os dados do MongoDB Atlas. Se quiser IA externa real, adicione também a variável GEMINI_API_KEY.
 
 ## Publicação
 
