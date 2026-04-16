@@ -1,59 +1,25 @@
-import { existsSync, readFileSync } from "node:fs";
-import path from "node:path";
-import { ImageResponse } from "next/og";
 import sharp from "sharp";
 import { getEngineById } from "@/data/engines";
 import { findKnowledgeEntries } from "@/data/knowledge-base";
-import { createValveDiagramElement } from "@/lib/valve-diagram-template";
-import { createAssemblyDiagramElement } from "@/lib/assembly-diagram-template";
 import { generateAiBlueprint, generateGeminiMechanicalBase } from "@/lib/ai-schema";
 
 export const runtime = "nodejs";
 
 let embeddedFontCss = "";
-let manualFontData: Buffer | null | undefined;
-
-function getManualFontData() {
-  if (manualFontData !== undefined) {
-    return manualFontData;
-  }
-
-  const candidate = path.join(process.cwd(), "public", "fonts", "Geist-Regular.ttf");
-  manualFontData = existsSync(candidate) ? readFileSync(candidate) : null;
-  return manualFontData;
-}
 
 function getEmbeddedFontCss() {
   if (embeddedFontCss) {
     return embeddedFontCss;
   }
 
-  const candidates = [
-    path.join(process.cwd(), "public", "fonts", "Geist-Regular.ttf"),
-  ];
-
-  for (const candidate of candidates) {
-    if (existsSync(candidate)) {
-      const base64 = readFileSync(candidate).toString("base64");
-      embeddedFontCss = `
-        @font-face {
-          font-family: 'DejaVu Sans';
-          src: url(data:font/ttf;base64,${base64}) format('truetype');
-          font-style: normal;
-          font-weight: 400 800;
-        }
-        @font-face {
-          font-family: 'MTManual';
-          src: url(data:font/ttf;base64,${base64}) format('truetype');
-          font-style: normal;
-          font-weight: 400 800;
-        }
-      `;
-      return embeddedFontCss;
+  embeddedFontCss = `
+    text, tspan {
+      font-family: Arial, Helvetica, sans-serif;
+      font-style: normal;
     }
-  }
+  `;
 
-  return "";
+  return embeddedFontCss;
 }
 
 function normalizeManualText(value: string) {
