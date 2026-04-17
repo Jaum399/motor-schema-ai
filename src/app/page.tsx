@@ -249,15 +249,8 @@ export default function Home() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl space-y-3">
               <span className="inline-flex rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-200">
-                MT DIESEL ESQUEMAS
+                MT DIESEL
               </span>
-              <h1 className="text-3xl font-black tracking-tight text-white sm:text-5xl">
-                Esquemas detalhados estilo manual de oficina
-              </h1>
-              <p className="max-w-2xl text-sm text-slate-300 sm:text-base">
-                Informe a marca e o motor para gerar um esquema técnico detalhado, com padrão visual inspirado no manual
-                do OM352, mais detalhes mecânicos no desenho e variações para outros motores da linha diesel.
-              </p>
             </div>
             <div className="grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
               <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3 font-semibold">MT DIESEL</div>
