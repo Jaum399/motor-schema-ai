@@ -259,10 +259,9 @@ export default function Home() {
                 do OM352, mais detalhes mecânicos no desenho e variações para outros motores da linha diesel.
               </p>
             </div>
-            <div className="grid gap-3 text-sm text-slate-200 sm:grid-cols-3">
-              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">🔎 Busca objetiva por marca e motor</div>
+            <div className="grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
+              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3 font-semibold">MT DIESEL</div>
               <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">🛠️ Esquema mecânico detalhado</div>
-              <div className="rounded-2xl border border-slate-700 bg-slate-900/60 p-3">📲 Pronto para uso no celular</div>
             </div>
           </div>
         </section>
