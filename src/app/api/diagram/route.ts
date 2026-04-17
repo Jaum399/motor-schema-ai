@@ -781,38 +781,48 @@ export async function GET(request: Request) {
     );
 
     imageBuffer = await sharp(Buffer.from(await response.arrayBuffer()))
-      .jpeg({ quality: 97, mozjpeg: true })
+      .png({ compressionLevel: 4, palette: false })
+      .sharpen()
       .toBuffer();
   } else {
-    const response = new ImageResponse(
-      createAssemblyDiagramElement({
-        title,
-        engine,
-        variant: isGearbox ? "gearbox" : isVEngine ? "v-engine" : "inline",
-        torqueSpecs,
-        regulationLines,
-        measureLines,
-        noteLines,
-        referenceLines,
-        matchedFamily: matched?.family || (isGearbox ? "Transmissao pesada" : "Diesel pesado"),
-        matchedApplication: matched?.application || primaryKnowledge?.summary || "Consulta tecnica assistida",
-        matchedYears: matched?.years || "Base tecnica consolidada",
-        aiMode,
-        illustrationDataUrl: geminiIllustration,
-        componentFocus,
-      }),
-      imageOptions,
-    );
+    const svgMarkup = isVEngine
+      ? renderVEngineServiceSheet({
+          title,
+          engine,
+          torqueSpecs,
+          measureLines,
+          noteLines,
+          referenceLines,
+          geminiIllustration,
+          componentFocus,
+        })
+      : renderAssemblySheet({
+          title,
+          engine,
+          isGearbox,
+          torqueSpecs,
+          regulationLines,
+          measureLines,
+          noteLines,
+          referenceLines,
+          matchedFamily: matched?.family || (isGearbox ? "Transmissao pesada" : "Diesel pesado"),
+          matchedApplication: matched?.application || primaryKnowledge?.summary || "Consulta tecnica assistida",
+          matchedYears: matched?.years || "Base tecnica consolidada",
+          aiMode,
+          geminiIllustration,
+          componentFocus,
+        });
 
-    imageBuffer = await sharp(Buffer.from(await response.arrayBuffer()))
-      .jpeg({ quality: 97, mozjpeg: true })
+    imageBuffer = await sharp(Buffer.from(svgMarkup))
+      .png({ compressionLevel: 4, palette: false })
+      .sharpen()
       .toBuffer();
   }
 
   return new Response(new Uint8Array(imageBuffer), {
     headers: {
-      "Content-Type": "image/jpeg",
-      ...(download ? { "Content-Disposition": `attachment; filename="esquema-${brand}-${engine}.jpg"` } : {}),
+      "Content-Type": "image/png",
+      ...(download ? { "Content-Disposition": `attachment; filename="esquema-${brand}-${engine}.png"` } : {}),
     },
   });
 }
