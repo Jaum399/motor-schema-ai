@@ -422,7 +422,7 @@ function renderAssemblySheet({
     ${geminiIllustration ? `
       <rect x="72" y="268" width="620" height="290" rx="16" fill="#dbe4ea" stroke="#334155" stroke-width="2" />
       <image x="82" y="278" width="600" height="270" href="${geminiIllustration}" preserveAspectRatio="xMidYMid slice" />
-      <text x="84" y="585" fill="#0f172a" font-size="16" font-family="sans-serif" font-weight="700">ILUSTRACAO TECNICA REFINADA VIA GEMINI</text>
+      <text x="84" y="585" fill="#0f172a" font-size="16" font-family="sans-serif" font-weight="700">ILUSTRACAO TECNICA REFINADA VIA NANO BANANA 2</text>
     ` : ""}
 
     <g transform="translate(60,224)">
@@ -611,7 +611,7 @@ function renderVEngineServiceSheet({
     ${geminiIllustration ? `
       <rect x="88" y="590" width="740" height="220" rx="16" fill="#dbe4ea" stroke="#334155" stroke-width="2" />
       <image x="98" y="600" width="720" height="200" href="${geminiIllustration}" preserveAspectRatio="xMidYMid slice" />
-      <text x="105" y="832" fill="#0f172a" font-size="16" font-family="sans-serif" font-weight="700">REFERENCIA MECANICA V8 VIA GEMINI API</text>
+      <text x="105" y="832" fill="#0f172a" font-size="16" font-family="sans-serif" font-weight="700">REFERENCIA MECANICA V8 VIA NANO BANANA 2</text>
     ` : ""}
 
     <rect x="960" y="230" width="530" height="260" rx="16" fill="#eef6fa" stroke="#334155" stroke-width="2" />

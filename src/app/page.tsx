@@ -235,7 +235,7 @@ export default function Home() {
 
   const mainResult = result?.results?.[0];
   const aiProviderLabel = result?.aiProvider === "gemini"
-    ? "Gemini"
+    ? "Nano Banana 2"
     : result?.aiProvider === "openai"
       ? "ChatGPT"
       : result?.aiProvider === "openrouter"
@@ -301,7 +301,7 @@ export default function Home() {
                 onClick={handleGenerateWithAI}
                 className="rounded-2xl bg-violet-500 px-5 py-3 font-semibold text-white hover:bg-violet-400"
               >
-                {aiLoading ? "Gemini gerando..." : "Gerar com Gemini"}
+                {aiLoading ? "Nano Banana 2 gerando..." : "Gerar com Nano Banana 2"}
               </button>
               <button
                 type="button"

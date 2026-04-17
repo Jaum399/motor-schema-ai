@@ -257,7 +257,7 @@ export async function fetchPublicTechnicalData({
   engine?: string;
   model?: string;
 }): Promise<PublicTechData> {
-  const fallbackSources = ["Base técnica interna", "NHTSA", "Wikipedia", "Wikimedia Commons", "DuckDuckGo", "Gemini opcional"];
+  const fallbackSources = ["Base técnica interna", "NHTSA", "Wikipedia", "Wikimedia Commons", "DuckDuckGo", "Nano Banana 2 opcional"];
 
   try {
     const searchTerm = [brand, model, engine].filter(Boolean).join(" ") || "motor diesel";
@@ -300,7 +300,7 @@ export async function fetchPublicTechnicalData({
     if (pexelsImages.length) {
       sourceList.push("Pexels");
     }
-    sourceList.push("Gemini opcional");
+    sourceList.push("Nano Banana 2 opcional");
 
     return {
       modelHints,

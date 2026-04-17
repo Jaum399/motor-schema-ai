@@ -72,7 +72,7 @@ export async function GET(request: Request) {
       ...publicTechData,
       sourceLabel:
         aiBlueprint.provider === "gemini"
-          ? "Gemini + Base técnica + NHTSA + Wikipedia + DuckDuckGo"
+          ? "Nano Banana 2 + Base técnica + NHTSA + Wikipedia + DuckDuckGo"
           : publicTechData.sourceLabel,
     },
     storageMode,

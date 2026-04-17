@@ -69,7 +69,7 @@ export function createAssemblyDiagramElement({
   ).slice(0, 4);
 
   const torqueRows = torqueSpecs.slice(0, 4);
-  const specRows = [...measureLines, ...referenceLines].slice(0, 6);
+  const specRows = [...measureLines, ...referenceLines, ...torqueRows.map((item) => `${item.component}: ${item.value}`)].slice(0, 6);
   const sequenceOrder = isGearbox
     ? ["1", "3", "5", "7", "8", "6", "4", "2"]
     : isVEngine
@@ -231,7 +231,7 @@ export function createAssemblyDiagramElement({
                 </div>
               </div>
               <div style={{ display: "flex", fontSize: 14, fontWeight: 800, color: "#111827" }}>CONEXAO FRATURADA • CAPA CASADA • GUIA DE TORQUE E ASSENTAMENTO</div>
-              {headerBar(isGearbox ? "DADOS E TOLERANCIAS" : "ESPECIFICACOES DA BIELA")}
+              {headerBar(isGearbox ? "ESPECIFICACOES E TOLERANCIAS" : "ESPECIFICACOES DA BIELA")}
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {specRows.map((item, index) => (
                   <div key={`${item}-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: 10, background: index % 2 === 0 ? "#f0d592" : "#edd38a", border: "1px solid #b99b61", padding: "5px 8px", fontSize: 14, fontWeight: 800 }}>
@@ -288,7 +288,7 @@ export function createAssemblyDiagramElement({
 
         <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 10 }}>
           <div style={{ display: "flex", flexDirection: "column", border: "2px solid #c7ced4", borderRadius: 12, background: "#efefef", padding: 10, gap: 8, flex: 1 }}>
-            {headerBar(isGearbox ? "ESPECIFICACOES ADICIONAIS" : "ESPECIFICACOES ADICIONAIS DO CABECOTE")}
+            {headerBar(isGearbox ? "ESPECIFICACOES TECNICAS" : "ESPECIFICACOES TECNICAS DO CABECOTE")}
             <div style={{ display: "flex", gap: 14, flex: 1 }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, width: 250 }}>
                 <div style={{ display: "flex", width: 180, height: 34, background: "#bcc8cf", border: "3px solid #475569", borderRadius: 8, justifyContent: "space-around", alignItems: "center" }}>
