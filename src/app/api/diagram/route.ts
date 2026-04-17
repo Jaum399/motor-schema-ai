@@ -785,35 +785,27 @@ export async function GET(request: Request) {
       .sharpen()
       .toBuffer();
   } else {
-    const svgMarkup = isVEngine
-      ? renderVEngineServiceSheet({
-          title,
-          engine,
-          torqueSpecs,
-          measureLines,
-          noteLines,
-          referenceLines,
-          geminiIllustration,
-          componentFocus,
-        })
-      : renderAssemblySheet({
-          title,
-          engine,
-          isGearbox,
-          torqueSpecs,
-          regulationLines,
-          measureLines,
-          noteLines,
-          referenceLines,
-          matchedFamily: matched?.family || (isGearbox ? "Transmissao pesada" : "Diesel pesado"),
-          matchedApplication: matched?.application || primaryKnowledge?.summary || "Consulta tecnica assistida",
-          matchedYears: matched?.years || "Base tecnica consolidada",
-          aiMode,
-          geminiIllustration,
-          componentFocus,
-        });
+    const response = new ImageResponse(
+      createAssemblyDiagramElement({
+        title,
+        engine,
+        variant: isGearbox ? "gearbox" : isVEngine ? "v-engine" : "inline",
+        torqueSpecs,
+        regulationLines,
+        measureLines,
+        noteLines,
+        referenceLines,
+        matchedFamily: matched?.family || (isGearbox ? "Transmissao pesada" : "Diesel pesado"),
+        matchedApplication: matched?.application || primaryKnowledge?.summary || "Consulta tecnica assistida",
+        matchedYears: matched?.years || "Base tecnica consolidada",
+        aiMode,
+        illustrationDataUrl: geminiIllustration,
+        componentFocus,
+      }),
+      imageOptions,
+    );
 
-    imageBuffer = await sharp(Buffer.from(svgMarkup))
+    imageBuffer = await sharp(Buffer.from(await response.arrayBuffer()))
       .png({ compressionLevel: 4, palette: false })
       .sharpen()
       .toBuffer();
