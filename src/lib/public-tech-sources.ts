@@ -5,6 +5,15 @@ export type PublicTechImage = {
   sourceUrl?: string | null;
 };
 
+export type TechnicalProfile = {
+  architecture: "inline" | "v-engine" | "gearbox" | "valve-focus";
+  visualTheme: "iveco" | "scania" | "mercedes" | "volvo" | "cummins" | "mwm" | "generic";
+  layoutHint: "inline" | "v-engine" | "gearbox" | "valve";
+  keywords: string[];
+  confidence: "high" | "medium" | "low";
+  matchedSource: string;
+};
+
 export type PublicTechData = {
   modelHints: string[];
   wiki: {
@@ -17,7 +26,118 @@ export type PublicTechData = {
   sourceLabel: string;
   sourceList: string[];
   photoGallery: PublicTechImage[];
+  profile: TechnicalProfile;
 };
+
+type WikiApiPage = {
+  original?: { source?: string };
+  thumbnail?: { source?: string };
+  title?: string;
+  fullurl?: string | null;
+};
+
+type PexelsPhoto = {
+  src?: {
+    large2x?: string;
+    large?: string;
+    original?: string;
+  };
+  alt?: string;
+  url?: string | null;
+};
+
+function normalizeTechText(value?: string) {
+  return (value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+async function fetchWikidataFacts(term: string) {
+  const payload = await safeFetchJson(
+    `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(term)}&language=pt&limit=5&format=json&origin=*`
+  );
+
+  return (payload?.search || [])
+    .map((item: { label?: string; description?: string }) => [item.label, item.description].filter(Boolean).join(" - "))
+    .filter(Boolean)
+    .slice(0, 5);
+}
+
+function inferTechnicalProfile({
+  brand,
+  model,
+  engine,
+  wikiExtract,
+  duckAnswer,
+  wikidataFacts,
+}: {
+  brand?: string;
+  model?: string;
+  engine?: string;
+  wikiExtract?: string | null;
+  duckAnswer?: string | null;
+  wikidataFacts?: string[];
+}): TechnicalProfile {
+  const combined = normalizeTechText([
+    brand,
+    model,
+    engine,
+    wikiExtract || "",
+    duckAnswer || "",
+    ...(wikidataFacts || []),
+  ].join(" "));
+
+  const visualTheme = combined.includes("scania")
+    ? "scania"
+    : combined.includes("mercedes") || combined.includes("om")
+      ? "mercedes"
+      : combined.includes("volvo")
+        ? "volvo"
+        : combined.includes("cummins") || combined.includes("isx") || combined.includes("x15")
+          ? "cummins"
+          : combined.includes("mwm")
+            ? "mwm"
+            : combined.includes("iveco") || combined.includes("cursor")
+              ? "iveco"
+              : "generic";
+
+  const layoutHint = /g211|cambio|transmissao|gearbox|splitter|range/.test(combined)
+    ? "gearbox"
+    : /v8|dc16|dsc/.test(combined)
+      ? "v-engine"
+      : /om352|valv|regul|folga|balanc|admissao|escape/.test(combined)
+        ? "valve"
+        : "inline";
+
+  const architecture = layoutHint === "gearbox"
+    ? "gearbox"
+    : layoutHint === "v-engine"
+      ? "v-engine"
+      : layoutHint === "valve"
+        ? "valve-focus"
+        : "inline";
+
+  const keywords = ["biela", "mancal", "bronzina", "camisa", "cabecote", "pistao", "valvula", "sincronismo", "pde", "turbo"]
+    .filter((item) => combined.includes(item))
+    .slice(0, 6);
+
+  const confidence = wikiExtract || duckAnswer || (wikidataFacts?.length || 0) > 0
+    ? keywords.length >= 3
+      ? "high"
+      : "medium"
+    : "low";
+
+  return {
+    architecture,
+    visualTheme,
+    layoutHint,
+    keywords,
+    confidence,
+    matchedSource: wikiExtract ? "wikipedia" : duckAnswer ? "duckduckgo" : wikidataFacts?.length ? "wikidata" : "catalogo-local",
+  };
+}
 
 const curatedImageMap: Record<string, PublicTechImage[]> = {
   iveco: [
@@ -150,7 +270,7 @@ async function fetchWikipediaGallery(queries: string[]): Promise<PublicTechImage
         `https://${language}.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrlimit=4&prop=pageimages|info&piprop=original|thumbnail&pithumbsize=1600&inprop=url&format=json&origin=*`
       );
 
-      const pages = Object.values((payload?.query?.pages || {}) as Record<string, any>);
+      const pages = Object.values((payload?.query?.pages || {}) as Record<string, WikiApiPage>);
       return pages
         .map((page) => ({
           src: page?.original?.source || page?.thumbnail?.source || "",
@@ -173,7 +293,7 @@ async function fetchWikimediaImages(term: string): Promise<PublicTechImage[]> {
     `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(`${term} truck bus engine`)}&gsrlimit=6&prop=pageimages|info&piprop=original|thumbnail&pithumbsize=1600&inprop=url&format=json&origin=*`
   );
 
-  const pages = Object.values((payload?.query?.pages || {}) as Record<string, any>);
+  const pages = Object.values((payload?.query?.pages || {}) as Record<string, WikiApiPage>);
 
   return pages
     .map((page) => ({
@@ -198,8 +318,8 @@ async function fetchPexelsImages(term: string): Promise<PublicTechImage[]> {
     { Authorization: apiKey }
   );
 
-  return (payload?.photos || [])
-    .map((photo: any) => ({
+  return ((payload?.photos || []) as PexelsPhoto[])
+    .map((photo) => ({
       src: photo?.src?.large2x || photo?.src?.large || photo?.src?.original || "",
       title: photo?.alt || term,
       source: "Pexels",
@@ -257,7 +377,7 @@ export async function fetchPublicTechnicalData({
   engine?: string;
   model?: string;
 }): Promise<PublicTechData> {
-  const fallbackSources = ["Base técnica interna", "NHTSA", "Wikipedia", "Wikimedia Commons", "DuckDuckGo", "Nano Banana 2 opcional"];
+  const fallbackSources = ["Base técnica interna", "NHTSA", "Wikipedia", "Wikimedia Commons", "Wikidata", "DuckDuckGo", "Nano Banana 2 opcional"];
 
   try {
     const searchTerm = [brand, model, engine].filter(Boolean).join(" ") || "motor diesel";
@@ -269,13 +389,14 @@ export async function fetchPublicTechnicalData({
       [engine, "diesel"].filter(Boolean).join(" "),
     ].filter(Boolean);
 
-    const [modelHints, wiki, duckAnswer, wikipediaGallery, wikimediaImages, pexelsImages] = await Promise.all([
+    const [modelHints, wiki, duckAnswer, wikipediaGallery, wikimediaImages, pexelsImages, wikidataFacts] = await Promise.all([
       fetchModelHints(brand),
       fetchWikipediaSummary(searchTerm),
       fetchDuckAnswer(searchTerm),
       fetchWikipediaGallery(imageQueries),
       fetchWikimediaImages(searchTerm),
       fetchPexelsImages(searchTerm),
+      fetchWikidataFacts(searchTerm),
     ]);
 
     const photoGallery = [
@@ -296,7 +417,7 @@ export async function fetchPublicTechnicalData({
       .filter((item, index, array) => array.findIndex((entry) => entry.src === item.src) === index)
       .sort((a, b) => scoreReferenceImage(b) - scoreReferenceImage(a));
 
-    const sourceList = ["Base técnica interna", "NHTSA", "Wikipedia", "Wikimedia Commons", "DuckDuckGo"];
+    const sourceList = ["Base técnica interna", "NHTSA", "Wikipedia", "Wikimedia Commons", "Wikidata", "DuckDuckGo"];
     if (pexelsImages.length) {
       sourceList.push("Pexels");
     }
@@ -309,6 +430,14 @@ export async function fetchPublicTechnicalData({
       sourceList,
       sourceLabel: sourceList.join(" + "),
       photoGallery: (uniqueGallery.length ? uniqueGallery : getCuratedFallbackImages(brand)).slice(0, 6),
+      profile: inferTechnicalProfile({
+        brand,
+        model,
+        engine,
+        wikiExtract: wiki?.extract,
+        duckAnswer,
+        wikidataFacts,
+      }),
     };
   } catch {
     return {
@@ -318,6 +447,14 @@ export async function fetchPublicTechnicalData({
       sourceList: fallbackSources,
       sourceLabel: fallbackSources.join(" + "),
       photoGallery: getCuratedFallbackImages(brand),
+      profile: inferTechnicalProfile({
+        brand,
+        model,
+        engine,
+        wikiExtract: null,
+        duckAnswer: null,
+        wikidataFacts: [],
+      }),
     };
   }
 }

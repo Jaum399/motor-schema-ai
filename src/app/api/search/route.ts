@@ -42,7 +42,7 @@ export async function GET(request: Request) {
     bestMatch?.brand || filters.brand || "Motor"
   )}&model=${encodeURIComponent(bestMatch?.model || filters.model || "Esquema")}&engine=${encodeURIComponent(
     bestMatch?.engineCode || filters.engine || "Diesel"
-  )}`;
+  )}&layout=${encodeURIComponent(publicTechData.profile.layoutHint)}&theme=${encodeURIComponent(publicTechData.profile.visualTheme)}`;
 
   let storageMode: "mongodb" | "demo" = "demo";
 

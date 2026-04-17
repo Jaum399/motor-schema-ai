@@ -1,5 +1,6 @@
 import type { EngineRecord } from "@/data/engines";
 import { findKnowledgeEntries } from "@/data/knowledge-base";
+import { fetchPublicTechnicalData } from "@/lib/public-tech-sources";
 
 export type LayoutHint = "valve" | "inline" | "v-engine" | "gearbox";
 
@@ -13,6 +14,8 @@ export type AiBlueprint = {
   layoutHint: LayoutHint;
   componentFocus: string[];
   imagePrompt: string;
+  sourceBasis: string[];
+  manualConfirmationRequired: boolean;
 };
 
 function safeText(value: unknown, fallback: string) {
@@ -23,6 +26,10 @@ function safeStringArray(value: unknown, fallback: string[], maxItems = fallback
   return Array.isArray(value) && value.length
     ? value.map((item) => String(item)).filter(Boolean).slice(0, maxItems)
     : fallback.slice(0, maxItems);
+}
+
+function safeBoolean(value: unknown, fallback: boolean) {
+  return typeof value === "boolean" ? value : fallback;
 }
 
 function inferLayoutHint({
@@ -116,6 +123,8 @@ async function tryOpenAiCompatibleBlueprint({
       layoutHint: normalizeLayoutHint(parsed.layoutHint, fallback.layoutHint),
       componentFocus: safeStringArray(parsed.componentFocus, fallback.componentFocus, 4),
       imagePrompt: safeText(parsed.imagePrompt, fallback.imagePrompt),
+      sourceBasis: safeStringArray(parsed.sourceBasis, fallback.sourceBasis, 6),
+      manualConfirmationRequired: safeBoolean(parsed.manualConfirmationRequired, fallback.manualConfirmationRequired),
     };
   } catch {
     return null;
@@ -148,13 +157,14 @@ export function buildFallbackBlueprint({
     provider: "fallback",
     headline: primaryKnowledge?.title || `Esquema inteligente de ${engineName}`,
     narrative:
-      primaryKnowledge?.summary ||
-      `A IA montou um esquema técnico com foco em torques, sincronismo, cabeçote e fechamento final do ${engineName}.`,
-    warnings: primaryKnowledge?.mountingTips?.slice(0, 4) || [
+      (primaryKnowledge?.summary ||
+      `A IA montou um esquema técnico com foco em torques, sincronismo, cabeçote e fechamento final do ${engineName}.`) +
+      " Confirme biela, mancal, bronzina, altura de pistão e cabeçote no manual de serviço antes da montagem final.",
+    warnings: primaryKnowledge?.mountingTips?.slice(0, 3).concat("Se houver divergência entre fontes, usar apenas o manual oficial da aplicação.") || [
       "Lubrificar roscas criticas antes do aperto angular.",
       "Conferir planicidade do cabecote e espessura da junta.",
       "Executar sincronismo com o primeiro cilindro em PMS.",
-      "Revisar vazamentos e folgas antes da partida.",
+      "Se houver divergência entre fontes, usar apenas o manual oficial da aplicação.",
     ],
     detailLines: primaryKnowledge?.measurements?.slice(0, 4) || [
       `Aplicacao: ${record?.application || "linha diesel pesada"}`,
@@ -171,6 +181,8 @@ export function buildFallbackBlueprint({
     layoutHint,
     componentFocus,
     imagePrompt: `Crie uma ilustracao tecnica hiper-realista de manual de oficina para ${engineName}, com layout exatamente no estilo de prancha explodida industrial de motores diesel: titulo grande no topo, quadro 1 com VISTA EXPLODIDA GERAL, quadro 2 com SUB-MONTAGEM DO BLOCO, quadro 3 com SUB-MONTAGEM DO CABECOTE, quadro 4 com SISTEMA DE DISTRIBUICAO, legenda lateral de pecas e caixa legivel de ESPECIFICACOES TECNICAS. Usar metais escovados, parafusos, dutos, linhas pontilhadas, etiquetas numeradas em portugues brasil e aspecto de manual original escaneado. Sem cartum. Foco em ${componentFocus.join(", ")}.`,
+    sourceBasis: ["Base técnica interna", "NHTSA", "Wikipedia", "Wikimedia Commons", "DuckDuckGo"],
+    manualConfirmationRequired: true,
   };
 }
 
@@ -188,6 +200,11 @@ export async function generateAiBlueprint({
   const openAiKey = process.env.OPENAI_API_KEY;
   const openRouterKey = process.env.OPENROUTER_API_KEY;
   const knowledge = findKnowledgeEntries(brand || record?.brand, engine || record?.engineCode);
+  const publicTechData = await fetchPublicTechnicalData({
+    brand: brand || record?.brand,
+    engine: engine || record?.engineCode,
+    model: record?.model,
+  });
   const knowledgeContext = knowledge
     .map(
       (item) =>
@@ -199,8 +216,15 @@ export async function generateAiBlueprint({
     return fallback;
   }
 
-  const prompt = `Atue como especialista em motores diesel pesados e designer de manuais de oficina.
-Responda sempre em portugues brasil, com linguagem tecnica, objetiva e visual de oficina.
+  const publicContext = [
+    `Fontes publicas: ${publicTechData.sourceLabel}`,
+    publicTechData.wiki?.extract ? `Wikipedia: ${publicTechData.wiki.extract}` : "Wikipedia: sem resumo tecnico confiavel para este termo.",
+    publicTechData.duckAnswer ? `DuckDuckGo: ${publicTechData.duckAnswer}` : "DuckDuckGo: sem resposta tecnica objetiva.",
+    publicTechData.modelHints?.length ? `Modelos associados via NHTSA: ${publicTechData.modelHints.join(" | ")}` : "NHTSA: sem modelos associados relevantes.",
+  ].join("\n");
+
+  const prompt = `Atue como especialista em motores diesel pesados e montagem de oficina.
+Responda sempre em portugues brasil, com linguagem tecnica, objetiva, conservadora e segura.
 
 Referencia visual principal: folha de manual OM352 de regulagem de valvulas, com acabamento industrial limpo, textura de impressao tecnica, setas, cotas, blocos claros e componentes mecanicos reconheciveis.
 Agora adapte esse padrao ao motor consultado com aspecto mais realista e fiel ao manual original.
@@ -208,24 +232,41 @@ Agora adapte esse padrao ao motor consultado com aspecto mais realista e fiel ao
 Marca: ${brand || record?.brand || "nao informado"}
 Motor: ${engine || record?.engineCode || record?.model || "nao informado"}
 Contexto tecnico confiavel:\n${knowledgeContext || "Sem historico adicional"}
+Contexto publico adicional:\n${publicContext}
 
 Objetivo:
 - definir o melhor layout do manual tecnico
 - destacar componentes mecanicos mais importantes
-- criar instrucoes curtas para paines do esquema
-- sugerir um prompt visual para um gerador de imagem Nano Banana 2
+- gerar instrucoes curtas para torques, biela, mancal, bronzina, altura de pistao/camisa, cabeçote e sincronismo
+- sugerir um prompt visual para um gerador de imagem Gemini / Nano Banana 2
 
-Nunca invente valores fora da base disponivel. Se faltar valor, descreva procedimento seguro e tecnico.
+Regras de seguranca:
+- nunca invente torque, folga, altura, projeção ou aperto angular sem base no contexto acima
+- se faltar valor exato, escreva explicitamente VALIDAR NO MANUAL DE SERVICO
+- priorize precisão sobre quantidade
+- considere que erro pode danificar o motor
+
 Retorne estritamente JSON com as chaves:
-headline, narrative, warnings, detailLines, recommendedSequence, layoutHint, componentFocus, imagePrompt.
+headline, narrative, warnings, detailLines, recommendedSequence, layoutHint, componentFocus, imagePrompt, sourceBasis, manualConfirmationRequired.
 
 Regras:
 - warnings, detailLines, recommendedSequence e componentFocus com exatamente 4 itens
+- sourceBasis com 3 a 6 itens curtos
+- manualConfirmationRequired deve ser true quando houver qualquer valor sensivel de montagem
 - layoutHint deve ser apenas: valve, inline, v-engine ou gearbox
 - imagePrompt deve pedir uma ilustracao mecanica hiper-realista, com acabamento igual manual original, metais, parafusos, tubulacoes, callouts numerados e pagina de oficina diesel, sem aspecto cartum.`;
 
   if (apiKey) {
-    const models = ["gemini-2.0-flash", "gemini-2.0-flash-lite"];
+    const models = [
+      process.env.GEMINI_MODEL,
+      "gemini-2.5-flash-lite",
+      "gemini-flash-latest",
+      "gemini-flash-lite-latest",
+      "gemini-3.1-flash-lite-preview",
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-2.0-flash-lite",
+    ].filter((value): value is string => Boolean(value));
 
     for (const modelName of models) {
       try {
@@ -239,7 +280,7 @@ Regras:
             body: JSON.stringify({
               contents: [{ role: "user", parts: [{ text: prompt }] }],
               generationConfig: {
-                temperature: 0.35,
+                temperature: 0.2,
                 responseMimeType: "application/json",
               },
             }),
@@ -268,6 +309,8 @@ Regras:
           layoutHint: normalizeLayoutHint(parsed.layoutHint, fallback.layoutHint),
           componentFocus: safeStringArray(parsed.componentFocus, fallback.componentFocus, 4),
           imagePrompt: safeText(parsed.imagePrompt, fallback.imagePrompt),
+          sourceBasis: safeStringArray(parsed.sourceBasis, publicTechData.sourceList, 6),
+          manualConfirmationRequired: safeBoolean(parsed.manualConfirmationRequired, true),
         };
       } catch {
         continue;
@@ -333,9 +376,10 @@ export async function generateGeminiMechanicalBase({
   const models = [
     process.env.NANO_BANANA_2_MODEL,
     process.env.NANO_BANANA_MODEL,
-    "gemini-2.5-flash-image-preview",
-    "gemini-2.0-flash-preview-image-generation",
-    "gemini-2.0-flash-exp-image-generation",
+    "gemini-2.5-flash-image",
+    "gemini-3-pro-image-preview",
+    "gemini-3.1-flash-image-preview",
+    "nano-banana-pro-preview",
   ].filter((value): value is string => Boolean(value));
 
   for (const modelName of models) {

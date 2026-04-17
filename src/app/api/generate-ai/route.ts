@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     bestMatch?.brand || filters.brand || "Motor"
   )}&model=${encodeURIComponent(bestMatch?.model || filters.model || "Esquema")}&engine=${encodeURIComponent(
     bestMatch?.engineCode || filters.engine || "Diesel"
-  )}&mode=ai`;
+  )}&mode=ai&layout=${encodeURIComponent(aiBlueprint.layoutHint || publicTechData.profile.layoutHint)}&theme=${encodeURIComponent(publicTechData.profile.visualTheme)}`;
 
   let storageMode: "mongodb" | "demo" = "demo";
   try {
@@ -72,7 +72,7 @@ export async function GET(request: Request) {
       ...publicTechData,
       sourceLabel:
         aiBlueprint.provider === "gemini"
-          ? "Nano Banana 2 + Base técnica + NHTSA + Wikipedia + DuckDuckGo"
+          ? "Gemini + Base técnica + NHTSA + Wikipedia + Wikimedia Commons + DuckDuckGo"
           : publicTechData.sourceLabel,
     },
     storageMode,

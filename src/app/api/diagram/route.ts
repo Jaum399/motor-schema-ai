@@ -174,6 +174,30 @@ function mergeUniqueLines(...groups: Array<string[] | undefined>) {
     });
 }
 
+type LayoutFlavor = "valve" | "inline" | "v-engine" | "gearbox";
+type VisualTheme = "iveco" | "scania" | "mercedes" | "volvo" | "cummins" | "mwm" | "generic";
+
+function normalizeRequestedLayout(value: string | null): LayoutFlavor | null {
+  return value === "valve" || value === "inline" || value === "v-engine" || value === "gearbox"
+    ? value
+    : null;
+}
+
+function normalizeVisualTheme(value: string | null, brand: string, model: string, engine: string): VisualTheme {
+  if (value === "iveco" || value === "scania" || value === "mercedes" || value === "volvo" || value === "cummins" || value === "mwm" || value === "generic") {
+    return value;
+  }
+
+  const combined = normalizeManualText([brand, model, engine].join(" ")).toLowerCase();
+  if (combined.includes("scania")) return "scania";
+  if (combined.includes("mercedes") || combined.includes("om")) return "mercedes";
+  if (combined.includes("volvo")) return "volvo";
+  if (combined.includes("cummins") || combined.includes("isx") || combined.includes("x15")) return "cummins";
+  if (combined.includes("mwm")) return "mwm";
+  if (combined.includes("iveco") || combined.includes("cursor")) return "iveco";
+  return "generic";
+}
+
 function inferLayoutFlavor({
   brand,
   model,
@@ -645,6 +669,8 @@ export async function GET(request: Request) {
   const download = searchParams.get("download") === "1";
   const aiMode = searchParams.get("mode") === "ai";
   const requestedTitle = normalizeManualText(searchParams.get("title") || "").trim();
+  const requestedLayout = normalizeRequestedLayout(searchParams.get("layout"));
+  const visualTheme = normalizeVisualTheme(searchParams.get("theme"), brand, model, engine);
 
   const matched = getEngineById(id);
   const knowledge = findKnowledgeEntries(brand, engine);
@@ -657,7 +683,7 @@ export async function GET(request: Request) {
         engine,
       })
     : null;
-  const layoutFlavor = aiBlueprint?.layoutHint || inferLayoutFlavor({
+  const layoutFlavor = requestedLayout || aiBlueprint?.layoutHint || inferLayoutFlavor({
     brand,
     model,
     engine,
@@ -770,12 +796,15 @@ export async function GET(request: Request) {
     const response = new ImageResponse(
       createValveDiagramElement({
         title,
+        brand,
+        model,
         firingOrder: inferFiringOrder(regulationLines),
         admission: clearances.admission,
         exhaust: clearances.exhaust,
         notes: mergeUniqueLines(noteLines, measureLines, regulationLines).slice(0, 6),
         procedure: buildBalanceProcedure(),
         illustrationDataUrl: geminiIllustration,
+        visualTheme,
       }),
       imageOptions,
     );
@@ -788,8 +817,11 @@ export async function GET(request: Request) {
     const response = new ImageResponse(
       createAssemblyDiagramElement({
         title,
+        brand,
+        model,
         engine,
         variant: isGearbox ? "gearbox" : isVEngine ? "v-engine" : "inline",
+        visualTheme,
         torqueSpecs,
         regulationLines,
         measureLines,
@@ -814,6 +846,9 @@ export async function GET(request: Request) {
   return new Response(new Uint8Array(imageBuffer), {
     headers: {
       "Content-Type": "image/png",
+      "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+      Pragma: "no-cache",
+      Expires: "0",
       ...(download ? { "Content-Disposition": `attachment; filename="esquema-${brand}-${engine}.png"` } : {}),
     },
   });

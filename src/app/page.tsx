@@ -30,6 +30,8 @@ type SearchResponse = {
     warnings: string[];
     detailLines: string[];
     recommendedSequence: string[];
+    sourceBasis?: string[];
+    manualConfirmationRequired?: boolean;
   };
   generatedAt: string;
   schemaImageUrl: string;
@@ -89,6 +91,16 @@ async function parseJsonSafe(response: Response) {
   } catch {
     return {};
   }
+}
+
+function appendCacheBuster(url?: string | null, cacheKey?: string) {
+  if (!url) {
+    return "";
+  }
+
+  const separator = url.includes("?") ? "&" : "?";
+  const resolvedKey = cacheKey || new Date().toISOString();
+  return `${url}${separator}ts=${encodeURIComponent(resolvedKey)}`;
 }
 
 export default function Home() {
@@ -192,25 +204,27 @@ export default function Home() {
     window.location.assign(url);
   }
 
+  const schemaDisplayUrl = appendCacheBuster(result?.schemaImageUrl, result?.generatedAt);
+
   function openSchemaPreview() {
-    if (!result?.schemaImageUrl) {
+    if (!schemaDisplayUrl) {
       return;
     }
 
     if (isAppMode) {
-      openInApp(result.schemaImageUrl);
+      openInApp(schemaDisplayUrl);
       return;
     }
 
-    window.open(result.schemaImageUrl, "_blank", "noopener,noreferrer");
+    window.open(schemaDisplayUrl, "_blank", "noopener,noreferrer");
   }
 
   function openSchemaDownload() {
-    if (!result?.schemaImageUrl) {
+    if (!schemaDisplayUrl) {
       return;
     }
 
-    const finalUrl = `${result.schemaImageUrl}&download=1`;
+    const finalUrl = `${schemaDisplayUrl}&download=1`;
 
     if (isAppMode) {
       openInApp(finalUrl);
@@ -235,12 +249,16 @@ export default function Home() {
 
   const mainResult = result?.results?.[0];
   const aiProviderLabel = result?.aiProvider === "gemini"
-    ? "Nano Banana 2"
+    ? "Gemini"
     : result?.aiProvider === "openai"
       ? "ChatGPT"
       : result?.aiProvider === "openrouter"
         ? "OpenRouter"
-        : "Assistente local";
+        : "Catálogo técnico local";
+
+  const safetyMessage = result?.aiProvider === "gemini"
+    ? "Gemini ativo com apoio de base técnica e fontes públicas. Ainda assim, confirme torques críticos no manual antes do fechamento final."
+    : "Gemini indisponível no momento; o sistema está usando catálogo técnico e fontes públicas. Confirme biela, mancal, bronzina, altura de pistão/camisa e cabeçote no manual oficial.";
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -294,7 +312,7 @@ export default function Home() {
                 type="submit"
                 className="rounded-2xl bg-cyan-500 px-5 py-3 font-semibold text-slate-950 hover:bg-cyan-400"
               >
-                {loading ? "Buscando..." : "Gerar imagem JPG"}
+                {loading ? "Buscando..." : "Gerar imagem PNG"}
               </button>
               <button
                 type="button"
@@ -373,13 +391,31 @@ export default function Home() {
               </div>
 
               <img
-                src={result.schemaImageUrl}
-                alt="Imagem JPG do esquema técnico"
+                key={schemaDisplayUrl || "schema-preview"}
+                src={schemaDisplayUrl}
+                alt="Imagem PNG do esquema técnico"
                 className="w-full rounded-2xl border border-slate-700 bg-white"
               />
 
               <div className="mt-4 rounded-2xl bg-cyan-500/10 p-4 text-sm text-cyan-50">
                 {result.aiSummary}
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-100">
+                <p className="font-semibold">Conferência crítica de oficina</p>
+                <p className="mt-2">{safetyMessage}</p>
+                {result.aiBlueprint?.warnings?.length ? (
+                  <ul className="mt-3 list-disc space-y-1 pl-5">
+                    {result.aiBlueprint.warnings.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {result.publicData.sourceList?.length ? (
+                  <p className="mt-3 text-xs text-amber-200">
+                    Fontes consultadas: {result.publicData.sourceList.join(" • ")}
+                  </p>
+                ) : null}
               </div>
 
               {showAiPreview ? (
@@ -402,7 +438,7 @@ export default function Home() {
                         onClick={openSchemaDownload}
                         className="rounded-xl bg-violet-500 px-3 py-2 text-sm font-semibold text-white"
                       >
-                        {isAppMode ? "Abrir JPG no app" : "Aprovar e baixar JPG"}
+                        {isAppMode ? "Abrir PNG no app" : "Aprovar e baixar PNG"}
                       </button>
                     </div>
                   </div>

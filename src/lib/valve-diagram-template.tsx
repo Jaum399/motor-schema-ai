@@ -5,23 +5,52 @@ type ProcedureItem = {
   regular: string;
 };
 
+type VisualTheme = "iveco" | "scania" | "mercedes" | "volvo" | "cummins" | "mwm" | "generic";
+
+function getThemePalette(theme: VisualTheme) {
+  switch (theme) {
+    case "iveco":
+      return { accent: "#d97706", soft: "#fff7ed", panel: "#ffedd5", dark: "#7c2d12" };
+    case "scania":
+      return { accent: "#2563eb", soft: "#eff6ff", panel: "#dbeafe", dark: "#1e3a8a" };
+    case "mercedes":
+      return { accent: "#475569", soft: "#f8fafc", panel: "#e2e8f0", dark: "#0f172a" };
+    case "volvo":
+      return { accent: "#0f766e", soft: "#ecfeff", panel: "#ccfbf1", dark: "#134e4a" };
+    case "cummins":
+      return { accent: "#b91c1c", soft: "#fef2f2", panel: "#fee2e2", dark: "#7f1d1d" };
+    case "mwm":
+      return { accent: "#15803d", soft: "#f0fdf4", panel: "#dcfce7", dark: "#166534" };
+    default:
+      return { accent: "#0f766e", soft: "#f8fafc", panel: "#e2e8f0", dark: "#1f2937" };
+  }
+}
+
 export function createValveDiagramElement({
   title,
+  brand,
+  model,
   firingOrder,
   admission,
   exhaust,
   notes,
   procedure,
   illustrationDataUrl,
+  visualTheme = "generic",
 }: {
   title: string;
+  brand: string;
+  model: string;
   firingOrder: string;
   admission: string;
   exhaust: string;
   notes: string[];
   procedure: ProcedureItem[];
   illustrationDataUrl?: string | null;
+  visualTheme?: VisualTheme;
 }) {
+  const palette = getThemePalette(visualTheme);
+
   return (
     <div
       style={{
@@ -29,7 +58,7 @@ export function createValveDiagramElement({
         height: 1500,
         display: "flex",
         flexDirection: "column",
-        background: "linear-gradient(180deg, #edf3f7 0%, #eef2f4 100%)",
+        background: `linear-gradient(180deg, ${palette.soft} 0%, #eef2f4 100%)`,
         color: "#111827",
         fontFamily: "MTManual, sans-serif",
         padding: 16,
@@ -46,14 +75,14 @@ export function createValveDiagramElement({
           minHeight: 74,
           border: "3px solid #111827",
           borderRadius: 12,
-          background: "#f6f8fa",
+          background: palette.panel,
           fontSize: 34,
           fontWeight: 900,
           textAlign: "center",
           padding: "0 12px",
         }}
       >
-        {title}
+        {title} • {brand} {model}
       </div>
 
       <div style={{ display: "flex", gap: 10, flex: 1 }}>
@@ -68,8 +97,8 @@ export function createValveDiagramElement({
                 { label: "ESCAPE", color: "#cf362a", value: `${exhaust}mm` },
               ].map((item, index) => (
                 <div key={`${item.label}-${index}`} style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "flex-end" }}>
-                  <div style={{ display: "flex", padding: "6px 10px", borderRadius: 8, background: item.color, color: "#fff", fontSize: 14, fontWeight: 900 }}>{item.label}</div>
-                  <div style={{ display: "flex", padding: "6px 10px", borderRadius: 8, background: item.color, color: "#fff", fontSize: 18, fontWeight: 900 }}>{item.value}</div>
+                  <div style={{ display: "flex", padding: "6px 10px", borderRadius: 8, background: index % 2 === 0 ? palette.accent : palette.dark, color: "#fff", fontSize: 14, fontWeight: 900 }}>{item.label}</div>
+                  <div style={{ display: "flex", padding: "6px 10px", borderRadius: 8, background: index % 2 === 0 ? palette.accent : palette.dark, color: "#fff", fontSize: 18, fontWeight: 900 }}>{item.value}</div>
                 </div>
               ))}
             </div>
@@ -95,7 +124,7 @@ export function createValveDiagramElement({
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 118, border: "3px solid #374151", borderRadius: 12, background: "#f8fafc", fontSize: 30, fontWeight: 900 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 118, border: `3px solid ${palette.dark}`, borderRadius: 12, background: palette.soft, fontSize: 30, fontWeight: 900 }}>
             CONDICAO: MOTOR FRIO
           </div>
         </div>
