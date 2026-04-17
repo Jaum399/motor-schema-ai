@@ -170,7 +170,7 @@ export function buildFallbackBlueprint({
     ],
     layoutHint,
     componentFocus,
-    imagePrompt: `Crie uma ilustracao tecnica hiper-realista de manual de oficina para ${engineName}, com acabamento igual ao manual original escaneado, vista mecanica isometrica e ortografica, metais escovados, parafusos, galerias de oleo, dutos, sombras suaves, etiquetas numeradas em portugues brasil, setas de torque e folha tecnica limpa. Sempre incluir um quadro legivel de ESPECIFICACOES TECNICAS com torques, folgas, medidas e observacoes. Sem cartum. Foco em ${componentFocus.join(", ")}.`,
+    imagePrompt: `Crie uma ilustracao tecnica hiper-realista de manual de oficina para ${engineName}, com layout exatamente no estilo de prancha explodida industrial de motores diesel: titulo grande no topo, quadro 1 com VISTA EXPLODIDA GERAL, quadro 2 com SUB-MONTAGEM DO BLOCO, quadro 3 com SUB-MONTAGEM DO CABECOTE, quadro 4 com SISTEMA DE DISTRIBUICAO, legenda lateral de pecas e caixa legivel de ESPECIFICACOES TECNICAS. Usar metais escovados, parafusos, dutos, linhas pontilhadas, etiquetas numeradas em portugues brasil e aspecto de manual original escaneado. Sem cartum. Foco em ${componentFocus.join(", ")}.`,
   };
 }
 
@@ -329,7 +329,7 @@ export async function generateGeminiMechanicalBase({
     return null;
   }
 
-  const prompt = `${blueprint.imagePrompt}\nMarca: ${brand}\nModelo: ${model}\nMotor: ${engine}\nGerar como pagina de manual tecnico original de oficina, ultra detalhada, com tubulacoes, parafusos, juntas, etiquetas numeradas, sombras metalicas suaves, recortes limpos e aparencia fototecnica impressa. Sempre mostrar ESPECIFICACOES TECNICAS de forma legivel. Sem fundo artistico, sem pessoas e sem estilo infantil.`;
+  const prompt = `${blueprint.imagePrompt}\nMarca: ${brand}\nModelo: ${model}\nMotor: ${engine}\nGerar como pagina de manual tecnico original de oficina, ultra detalhada, com composicao o mais proxima possivel do manual de referencia: areas numeradas, vista explodida central, subquadros laterais e quadro final de especificacoes tecnicas totalmente legivel. Sem fundo artistico, sem pessoas e sem estilo infantil.`;
   const models = [
     process.env.NANO_BANANA_2_MODEL,
     process.env.NANO_BANANA_MODEL,
