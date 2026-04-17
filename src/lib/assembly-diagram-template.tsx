@@ -12,10 +12,13 @@ function sectionTitle(label: string) {
       style={{
         display: "flex",
         width: "100%",
-        fontSize: 22,
+        fontSize: 24,
         fontWeight: 900,
         color: "#111111",
         textTransform: "uppercase",
+        letterSpacing: 0.4,
+        paddingBottom: 4,
+        borderBottom: "2px solid #444444",
       }}
     >
       {label}
@@ -48,9 +51,17 @@ function badge(value: string | number, size = 30) {
 
 function legendRow(index: number, text: string) {
   return (
-    <div key={`${index}-${text}`} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+    <div
+      key={`${index}-${text}`}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 7,
+        minHeight: 26,
+      }}
+    >
       {badge(index, 24)}
-      <div style={{ display: "flex", fontSize: 12, fontWeight: 800, textTransform: "uppercase" }}>{text}</div>
+      <div style={{ display: "flex", fontSize: 12, fontWeight: 900, textTransform: "uppercase", lineHeight: 1.05 }}>{text}</div>
     </div>
   );
 }
@@ -153,8 +164,8 @@ export function createAssemblyDiagramElement({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          minHeight: 72,
-          border: "2px solid #333333",
+          minHeight: 74,
+          border: "3px solid #333333",
           borderRadius: 12,
           fontSize: 36,
           fontWeight: 900,
@@ -165,16 +176,16 @@ export function createAssemblyDiagramElement({
         {title}
       </div>
 
-      <div style={{ display: "flex", gap: 12, flex: 1 }}>
-        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 12 }}>
-          <div style={{ display: "flex", flexDirection: "column", border: "2px solid #444", background: "#f5f5f5", padding: 10, gap: 8, height: 760 }}>
+      <div style={{ display: "flex", gap: 10, flex: 1 }}>
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", border: "3px solid #444", background: "#f5f5f5", padding: 10, gap: 8, height: 780 }}>
             {sectionTitle("1. VISTA EXPLODIDA GERAL")}
-            <div style={{ display: "flex", gap: 10, flex: 1 }}>
-              <div style={{ display: "flex", flexDirection: "column", width: 320, gap: 6 }}>
+            <div style={{ display: "flex", gap: 8, flex: 1 }}>
+              <div style={{ display: "flex", flexDirection: "column", width: 286, gap: 5, paddingTop: 6, paddingLeft: 2 }}>
                 {labels.map((item, index) => legendRow(index + 1, item))}
               </div>
 
-              <div style={{ display: "flex", flex: 1, position: "relative", border: "1px solid #777", background: "#efefef", overflow: "hidden" }}>
+              <div style={{ display: "flex", flex: 1, position: "relative", border: "2px solid #777", background: "#efefef", overflow: "hidden" }}>
                 {illustrationDataUrl ? (
                   <img
                     src={illustrationDataUrl}
@@ -263,8 +274,8 @@ export function createAssemblyDiagramElement({
             </div>
           </div>
 
-          <div style={{ display: "flex", gap: 12, height: 470 }}>
-            <div style={{ display: "flex", flexDirection: "column", width: 760, border: "2px solid #444", background: "#f5f5f5", padding: 10, gap: 8 }}>
+          <div style={{ display: "flex", gap: 10, height: 450 }}>
+            <div style={{ display: "flex", flexDirection: "column", width: 790, border: "3px solid #444", background: "#f5f5f5", padding: 10, gap: 8 }}>
               {sectionTitle("2. SUB-MONTAGEM DO BLOCO")}
               <div style={{ display: "flex", gap: 12, flex: 1 }}>
                 <div style={{ display: "flex", flexDirection: "column", width: 180, justifyContent: "center", gap: 18 }}>
@@ -295,7 +306,7 @@ export function createAssemblyDiagramElement({
               </div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", flex: 1, border: "2px solid #444", background: "#f5f5f5", padding: 10, gap: 8 }}>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, border: "3px solid #444", background: "#f5f5f5", padding: 10, gap: 8 }}>
               {sectionTitle("3. SUB-MONTAGEM DO CABECOTE")}
               <div style={{ display: "flex", gap: 10, flex: 1 }}>
                 <div style={{ display: "flex", flexDirection: "column", width: 170, gap: 10, fontSize: 13, fontWeight: 800, textTransform: "uppercase" }}>
@@ -332,8 +343,8 @@ export function createAssemblyDiagramElement({
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", width: 520, gap: 12 }}>
-          <div style={{ display: "flex", flexDirection: "column", border: "2px solid #444", background: "#f5f5f5", padding: 10, gap: 8, height: 520 }}>
+        <div style={{ display: "flex", flexDirection: "column", width: 500, gap: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", border: "3px solid #444", background: "#f5f5f5", padding: 10, gap: 8, height: 510 }}>
             {sectionTitle("4. SISTEMA DE DISTRIBUICAO")}
             <div style={{ display: "flex", fontSize: 13, fontWeight: 800, textTransform: "uppercase" }}>ENGRENAGENS DE DISTRIBUICAO E MARCAS DE SINCRONISMO</div>
             <div style={{ display: "flex", flex: 1, position: "relative", border: "1px solid #777", background: "#efefef" }}>
@@ -353,7 +364,7 @@ export function createAssemblyDiagramElement({
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", border: "2px solid #444", background: "#f5f5f5", padding: 10, gap: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", border: "3px solid #444", background: "#f5f5f5", padding: 10, gap: 8 }}>
             <div style={{ display: "flex", flexDirection: "column", border: "1px solid #777" }}>
               <div style={{ display: "flex", justifyContent: "center", minHeight: 28, alignItems: "center", background: "#e3e3e3", borderBottom: "1px solid #777", fontSize: 14, fontWeight: 900, textTransform: "uppercase" }}>LEGENDA DE PECAS</div>
               {labels.slice(0, 7).map((item, index) => (
